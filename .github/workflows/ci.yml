@@ -113,6 +113,10 @@ jobs:
         working-directory: backend
       - run: pnpm prisma generate
         working-directory: backend
+      - run: pnpm prisma migrate deploy
+        working-directory: backend
+        env:
+          DATABASE_URL: postgresql://konstrukt:konstrukt_password@localhost:5432/konstrukt_e2e
       - run: pnpm test:e2e
         working-directory: backend
         env:
