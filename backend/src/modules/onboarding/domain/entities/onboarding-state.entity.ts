@@ -75,7 +75,9 @@ export class OnboardingState {
    * Returns missing required steps (steps not present in `data`).
    */
   missingSteps(): string[] {
-    return ONBOARDING_STEPS[this.props.role].filter((s) => !(s in this.props.data));
+    return ONBOARDING_STEPS[this.props.role].filter(
+      (s) => !(s in this.props.data),
+    );
   }
 
   saveStep(step: string, stepData: Record<string, unknown>): void {
@@ -121,7 +123,9 @@ export class OnboardingState {
 
   approve(): void {
     if (this.props.status !== OnboardingStatus.PENDING_VERIFICATION) {
-      throw new OnboardingNotReadyException(['submission required before approval']);
+      throw new OnboardingNotReadyException([
+        'submission required before approval',
+      ]);
     }
     this.props.status = OnboardingStatus.COMPLETED;
     this.props.completedAt = new Date();
@@ -130,7 +134,9 @@ export class OnboardingState {
 
   reject(reason: string): void {
     if (this.props.status !== OnboardingStatus.PENDING_VERIFICATION) {
-      throw new OnboardingNotReadyException(['submission required before rejection']);
+      throw new OnboardingNotReadyException([
+        'submission required before rejection',
+      ]);
     }
     this.props.status = OnboardingStatus.REJECTED;
     this.props.rejectedAt = new Date();

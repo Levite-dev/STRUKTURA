@@ -7,7 +7,9 @@ import { EmailNotVerifiedException } from '../../domain/exceptions/auth.exceptio
 @Injectable()
 export class EmailVerifiedGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
-    const req = context.switchToHttp().getRequest<Request & { user?: AuthenticatedUser }>();
+    const req = context
+      .switchToHttp()
+      .getRequest<Request & { user?: AuthenticatedUser }>();
     const user = req.user;
     if (!user || !user.emailVerifiedAt) {
       throw new EmailNotVerifiedException();

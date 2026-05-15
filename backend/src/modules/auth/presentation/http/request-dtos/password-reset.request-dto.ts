@@ -1,4 +1,11 @@
-import { IsEmail, IsOptional, IsString, MaxLength, MinLength, IsUrl } from 'class-validator';
+import {
+  IsEmail,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength,
+  IsUrl,
+} from 'class-validator';
 
 export class RequestPasswordResetDto {
   @IsEmail()

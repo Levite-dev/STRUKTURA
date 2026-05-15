@@ -44,9 +44,10 @@ export class OnboardingController {
     @Param('role', PublicRoleParamPipe) role: Role,
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<OnboardingStateResponseDto> {
-    const state = await this.commandBus.execute<StartOnboardingCommand, OnboardingState>(
-      new StartOnboardingCommand(user.id, role),
-    );
+    const state = await this.commandBus.execute<
+      StartOnboardingCommand,
+      OnboardingState
+    >(new StartOnboardingCommand(user.id, role));
     return OnboardingStateResponseDto.fromDomain(state);
   }
 
@@ -55,9 +56,10 @@ export class OnboardingController {
     @Param('role', PublicRoleParamPipe) role: Role,
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<OnboardingStateResponseDto> {
-    const state = await this.queryBus.execute<GetOnboardingStateQuery, OnboardingState | null>(
-      new GetOnboardingStateQuery(user.id, role),
-    );
+    const state = await this.queryBus.execute<
+      GetOnboardingStateQuery,
+      OnboardingState | null
+    >(new GetOnboardingStateQuery(user.id, role));
     if (!state) {
       throw new OnboardingNotFoundException();
     }
@@ -70,9 +72,10 @@ export class OnboardingController {
     @Body() dto: SaveStepRequestDto,
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<OnboardingStateResponseDto> {
-    const state = await this.commandBus.execute<SaveStepCommand, OnboardingState>(
-      new SaveStepCommand(user.id, role, dto.step, dto.data),
-    );
+    const state = await this.commandBus.execute<
+      SaveStepCommand,
+      OnboardingState
+    >(new SaveStepCommand(user.id, role, dto.step, dto.data));
     return OnboardingStateResponseDto.fromDomain(state);
   }
 
@@ -82,9 +85,10 @@ export class OnboardingController {
     @Param('role', PublicRoleParamPipe) role: Role,
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<OnboardingStateResponseDto> {
-    const state = await this.commandBus.execute<SubmitOnboardingCommand, OnboardingState>(
-      new SubmitOnboardingCommand(user.id, role),
-    );
+    const state = await this.commandBus.execute<
+      SubmitOnboardingCommand,
+      OnboardingState
+    >(new SubmitOnboardingCommand(user.id, role));
     return OnboardingStateResponseDto.fromDomain(state);
   }
 }

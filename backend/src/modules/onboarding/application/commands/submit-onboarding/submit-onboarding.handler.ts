@@ -17,9 +17,10 @@ import { AssignRoleCommand } from '../../../../users/application/commands/assign
 import { buildProfileInput } from '../../services/profile-input.builder';
 
 @CommandHandler(SubmitOnboardingCommand)
-export class SubmitOnboardingHandler
-  implements ICommandHandler<SubmitOnboardingCommand, OnboardingState>
-{
+export class SubmitOnboardingHandler implements ICommandHandler<
+  SubmitOnboardingCommand,
+  OnboardingState
+> {
   constructor(
     @Inject(ONBOARDING_STATE_REPOSITORY)
     private readonly states: OnboardingStateRepository,
@@ -29,7 +30,10 @@ export class SubmitOnboardingHandler
   ) {}
 
   async execute(command: SubmitOnboardingCommand): Promise<OnboardingState> {
-    const state = await this.states.findByUserAndRole(command.userId, command.role);
+    const state = await this.states.findByUserAndRole(
+      command.userId,
+      command.role,
+    );
     if (!state) {
       throw new OnboardingNotFoundException();
     }
@@ -44,7 +48,9 @@ export class SubmitOnboardingHandler
 
     // For non-gated roles, assign role immediately.
     if (autoCompleted) {
-      await this.commandBus.execute(new AssignRoleCommand(command.userId, command.role));
+      await this.commandBus.execute(
+        new AssignRoleCommand(command.userId, command.role),
+      );
     }
 
     return saved;

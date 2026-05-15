@@ -59,14 +59,22 @@ export class UserPrismaRepository implements UserRepository {
     });
   }
 
-  async recordLogin(userId: string, ip: string | null, at: Date): Promise<void> {
+  async recordLogin(
+    userId: string,
+    ip: string | null,
+    at: Date,
+  ): Promise<void> {
     await this.prisma.user.update({
       where: { id: userId },
       data: { lastLoginAt: at, lastLoginIp: ip },
     });
   }
 
-  async assignRole(userId: string, role: Role, assignedBy?: string | null): Promise<void> {
+  async assignRole(
+    userId: string,
+    role: Role,
+    assignedBy?: string | null,
+  ): Promise<void> {
     await this.prisma.userRole.upsert({
       where: { userId_role: { userId, role } },
       create: { userId, role, assignedBy: assignedBy ?? null },

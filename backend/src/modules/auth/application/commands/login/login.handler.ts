@@ -1,4 +1,10 @@
-import { CommandBus, CommandHandler, EventBus, ICommandHandler, QueryBus } from '@nestjs/cqrs';
+import {
+  CommandBus,
+  CommandHandler,
+  EventBus,
+  ICommandHandler,
+  QueryBus,
+} from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
 import { UserStatus } from '@prisma/client';
 
@@ -26,7 +32,10 @@ export interface LoginResult {
 }
 
 @CommandHandler(LoginCommand)
-export class LoginHandler implements ICommandHandler<LoginCommand, LoginResult> {
+export class LoginHandler implements ICommandHandler<
+  LoginCommand,
+  LoginResult
+> {
   constructor(
     @Inject(AUTH_PROVIDER_PORT) private readonly authProvider: AuthProviderPort,
     private readonly commandBus: CommandBus,
@@ -42,9 +51,10 @@ export class LoginHandler implements ICommandHandler<LoginCommand, LoginResult> 
     );
 
     // 2. Ensure internal user row exists.
-    let user = await this.queryBus.execute<GetUserBySupabaseIdQuery, User | null>(
-      new GetUserBySupabaseIdQuery(session.supabaseAuthId),
-    );
+    let user = await this.queryBus.execute<
+      GetUserBySupabaseIdQuery,
+      User | null
+    >(new GetUserBySupabaseIdQuery(session.supabaseAuthId));
     if (!user) {
       user = await this.commandBus.execute<SyncSupabaseUserCommand, User>(
         new SyncSupabaseUserCommand(
@@ -57,7 +67,10 @@ export class LoginHandler implements ICommandHandler<LoginCommand, LoginResult> 
     }
 
     // 3. Enforce business rules.
-    if (user.status === UserStatus.SUSPENDED || user.status === UserStatus.DELETED) {
+    if (
+      user.status === UserStatus.SUSPENDED ||
+      user.status === UserStatus.DELETED
+    ) {
       throw new AccountSuspendedException();
     }
     if (!session.emailConfirmedAt && !user.isEmailVerified()) {
@@ -65,9 +78,16 @@ export class LoginHandler implements ICommandHandler<LoginCommand, LoginResult> 
     }
 
     // 4. Record login + emit audit event.
-    await this.commandBus.execute(new RecordLoginCommand(user.id, command.ipAddress, new Date()));
+    await this.commandBus.execute(
+      new RecordLoginCommand(user.id, command.ipAddress, new Date()),
+    );
     this.eventBus.publish(
-      new UserLoggedInEvent(user.id, user.email, command.ipAddress, command.userAgent),
+      new UserLoggedInEvent(
+        user.id,
+        user.email,
+        command.ipAddress,
+        command.userAgent,
+      ),
     );
 
     return {

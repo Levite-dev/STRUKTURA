@@ -19,7 +19,11 @@ export interface UserRepository {
 
   recordLogin(userId: string, ip: string | null, at: Date): Promise<void>;
 
-  assignRole(userId: string, role: Role, assignedBy?: string | null): Promise<void>;
+  assignRole(
+    userId: string,
+    role: Role,
+    assignedBy?: string | null,
+  ): Promise<void>;
 
   revokeRole(userId: string, role: Role): Promise<void>;
 }

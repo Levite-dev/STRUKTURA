@@ -37,9 +37,10 @@ export class AdminOnboardingController {
 
   @Get('pending')
   async listPending(): Promise<OnboardingStateResponseDto[]> {
-    const states = await this.queryBus.execute<ListPendingOnboardingQuery, OnboardingState[]>(
-      new ListPendingOnboardingQuery(),
-    );
+    const states = await this.queryBus.execute<
+      ListPendingOnboardingQuery,
+      OnboardingState[]
+    >(new ListPendingOnboardingQuery());
     return states.map((s) => OnboardingStateResponseDto.fromDomain(s));
   }
 
@@ -49,9 +50,10 @@ export class AdminOnboardingController {
     @Param('id') id: string,
     @CurrentUser() admin: AuthenticatedUser,
   ): Promise<OnboardingStateResponseDto> {
-    const state = await this.commandBus.execute<ApproveOnboardingCommand, OnboardingState>(
-      new ApproveOnboardingCommand(id, admin.id),
-    );
+    const state = await this.commandBus.execute<
+      ApproveOnboardingCommand,
+      OnboardingState
+    >(new ApproveOnboardingCommand(id, admin.id));
     return OnboardingStateResponseDto.fromDomain(state);
   }
 
@@ -62,9 +64,10 @@ export class AdminOnboardingController {
     @Body() dto: RejectOnboardingRequestDto,
     @CurrentUser() admin: AuthenticatedUser,
   ): Promise<OnboardingStateResponseDto> {
-    const state = await this.commandBus.execute<RejectOnboardingCommand, OnboardingState>(
-      new RejectOnboardingCommand(id, admin.id, dto.reason),
-    );
+    const state = await this.commandBus.execute<
+      RejectOnboardingCommand,
+      OnboardingState
+    >(new RejectOnboardingCommand(id, admin.id, dto.reason));
     return OnboardingStateResponseDto.fromDomain(state);
   }
 }

@@ -28,12 +28,11 @@ async function bootstrap(): Promise<void> {
 
   const port = Number(process.env.PORT ?? 3000);
   await app.listen(port);
-  // eslint-disable-next-line no-console
+
   console.log(`STRUKTURA backend listening on http://localhost:${port}/api/v1`);
 }
 
 bootstrap().catch((err) => {
-  // eslint-disable-next-line no-console
   console.error('Fatal bootstrap error', err);
   process.exit(1);
 });

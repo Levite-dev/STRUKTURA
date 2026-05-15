@@ -48,7 +48,10 @@ export class AuthWebhooksController {
     const confirmedAtIso = payload.record?.email_confirmed_at;
 
     if (!supabaseAuthId || !confirmedAtIso) {
-      this.logger.warn({ payload }, 'Email-verified webhook missing record.id or email_confirmed_at');
+      this.logger.warn(
+        { payload },
+        'Email-verified webhook missing record.id or email_confirmed_at',
+      );
       return;
     }
 

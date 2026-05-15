@@ -10,14 +10,20 @@ import { OnboardingState } from '../../../domain/entities/onboarding-state.entit
 import { OnboardingNotFoundException } from '../../../domain/exceptions/onboarding.exceptions';
 
 @CommandHandler(SaveStepCommand)
-export class SaveStepHandler implements ICommandHandler<SaveStepCommand, OnboardingState> {
+export class SaveStepHandler implements ICommandHandler<
+  SaveStepCommand,
+  OnboardingState
+> {
   constructor(
     @Inject(ONBOARDING_STATE_REPOSITORY)
     private readonly states: OnboardingStateRepository,
   ) {}
 
   async execute(command: SaveStepCommand): Promise<OnboardingState> {
-    const state = await this.states.findByUserAndRole(command.userId, command.role);
+    const state = await this.states.findByUserAndRole(
+      command.userId,
+      command.role,
+    );
     if (!state) {
       throw new OnboardingNotFoundException();
     }

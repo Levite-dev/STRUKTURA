@@ -18,7 +18,9 @@ export class OnboardingAlreadyCompletedException extends ConflictException {
 
 export class OnboardingNotReadyException extends BadRequestException {
   constructor(missing: string[]) {
-    super(`Cannot complete onboarding — missing required steps: ${missing.join(', ')}`);
+    super(
+      `Cannot complete onboarding — missing required steps: ${missing.join(', ')}`,
+    );
   }
 }
 

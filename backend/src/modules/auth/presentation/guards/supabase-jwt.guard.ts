@@ -11,7 +11,10 @@ import type { Request } from 'express';
 
 import { IS_PUBLIC_KEY } from '../../../../shared/presentation/decorators';
 import { AuthenticatedUser } from '../../../../shared/presentation/decorators/current-user.decorator';
-import { AUTH_PROVIDER_PORT, type AuthProviderPort } from '../../application/ports/auth-provider.port';
+import {
+  AUTH_PROVIDER_PORT,
+  type AuthProviderPort,
+} from '../../application/ports/auth-provider.port';
 import { InvalidTokenException } from '../../domain/exceptions/auth.exceptions';
 import { UnauthorizedException } from '../../../../shared/domain/exceptions';
 import { GetUserBySupabaseIdQuery } from '../../../users/application/queries/get-user-by-supabase-id/get-user-by-supabase-id.query';
@@ -34,19 +37,26 @@ export class SupabaseJwtGuard implements CanActivate {
     ]);
     if (isPublic) return true;
 
-    const req = context.switchToHttp().getRequest<Request & { user?: AuthenticatedUser }>();
+    const req = context
+      .switchToHttp()
+      .getRequest<Request & { user?: AuthenticatedUser }>();
     const token = this.extractToken(req);
     if (!token) {
-      throw new UnauthorizedException('Missing or malformed Authorization header.');
+      throw new UnauthorizedException(
+        'Missing or malformed Authorization header.',
+      );
     }
 
     const claims = await this.authProvider.verifyAccessToken(token);
 
-    const user = await this.queryBus.execute<GetUserBySupabaseIdQuery, User | null>(
-      new GetUserBySupabaseIdQuery(claims.sub),
-    );
+    const user = await this.queryBus.execute<
+      GetUserBySupabaseIdQuery,
+      User | null
+    >(new GetUserBySupabaseIdQuery(claims.sub));
     if (!user) {
-      throw new InvalidTokenException('Authenticated user is not provisioned in the database.');
+      throw new InvalidTokenException(
+        'Authenticated user is not provisioned in the database.',
+      );
     }
 
     req.user = {

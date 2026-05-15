@@ -60,40 +60,79 @@ export class GlobalExceptionFilter implements ExceptionFilter {
   private map(exception: unknown, traceId: string): ProblemDetails {
     // Domain exceptions
     if (exception instanceof DomainNotFound) {
-      return this.build(HttpStatus.NOT_FOUND, exception.code, exception.message, traceId);
+      return this.build(
+        HttpStatus.NOT_FOUND,
+        exception.code,
+        exception.message,
+        traceId,
+      );
     }
     if (exception instanceof DomainConflict) {
-      return this.build(HttpStatus.CONFLICT, exception.code, exception.message, traceId);
+      return this.build(
+        HttpStatus.CONFLICT,
+        exception.code,
+        exception.message,
+        traceId,
+      );
     }
     if (exception instanceof DomainUnauthorized) {
-      return this.build(HttpStatus.UNAUTHORIZED, exception.code, exception.message, traceId);
+      return this.build(
+        HttpStatus.UNAUTHORIZED,
+        exception.code,
+        exception.message,
+        traceId,
+      );
     }
     if (exception instanceof DomainForbidden) {
-      return this.build(HttpStatus.FORBIDDEN, exception.code, exception.message, traceId);
+      return this.build(
+        HttpStatus.FORBIDDEN,
+        exception.code,
+        exception.message,
+        traceId,
+      );
     }
     if (exception instanceof DomainValidation) {
-      const p = this.build(HttpStatus.BAD_REQUEST, exception.code, exception.message, traceId);
+      const p = this.build(
+        HttpStatus.BAD_REQUEST,
+        exception.code,
+        exception.message,
+        traceId,
+      );
       p.errors = exception.errors;
       return p;
     }
     if (exception instanceof DomainBadRequest) {
-      return this.build(HttpStatus.BAD_REQUEST, exception.code, exception.message, traceId);
+      return this.build(
+        HttpStatus.BAD_REQUEST,
+        exception.code,
+        exception.message,
+        traceId,
+      );
     }
     if (exception instanceof DomainException) {
-      return this.build(HttpStatus.BAD_REQUEST, exception.code, exception.message, traceId);
+      return this.build(
+        HttpStatus.BAD_REQUEST,
+        exception.code,
+        exception.message,
+        traceId,
+      );
     }
 
     // NestJS HttpException (validation pipe, throttler, etc.)
     if (exception instanceof HttpException) {
       const status = exception.getStatus();
       const response = exception.getResponse();
+      const responseObj =
+        typeof response === 'object' && response !== null
+          ? (response as { message?: string | string[] })
+          : null;
       const detail =
         typeof response === 'string'
           ? response
-          : (response as { message?: string | string[] }).message ?? exception.message;
+          : (responseObj?.message ?? exception.message);
       const errors =
-        typeof response === 'object' && Array.isArray((response as any).message)
-          ? this.flattenClassValidator((response as any).message)
+        responseObj && Array.isArray(responseObj.message)
+          ? this.flattenClassValidator(responseObj.message)
           : undefined;
       const p = this.build(
         status,
@@ -124,7 +163,12 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     );
   }
 
-  private build(status: number, code: string, detail: string, traceId: string): ProblemDetails {
+  private build(
+    status: number,
+    code: string,
+    detail: string,
+    traceId: string,
+  ): ProblemDetails {
     return {
       type: `https://httpstatuses.com/${status}`,
       title: code,

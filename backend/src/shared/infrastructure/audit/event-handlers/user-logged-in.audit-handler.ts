@@ -2,12 +2,17 @@ import { EventsHandler, IEventHandler } from '@nestjs/cqrs';
 import { Inject, Injectable } from '@nestjs/common';
 
 import { UserLoggedInEvent } from '../../../../modules/auth/domain/events/user-logged-in.event';
-import { AUDIT_LOGGER_PORT, type AuditLoggerPort } from '../../../application/ports/audit-logger.port';
+import {
+  AUDIT_LOGGER_PORT,
+  type AuditLoggerPort,
+} from '../../../application/ports/audit-logger.port';
 
 @Injectable()
 @EventsHandler(UserLoggedInEvent)
 export class UserLoggedInAuditHandler implements IEventHandler<UserLoggedInEvent> {
-  constructor(@Inject(AUDIT_LOGGER_PORT) private readonly audit: AuditLoggerPort) {}
+  constructor(
+    @Inject(AUDIT_LOGGER_PORT) private readonly audit: AuditLoggerPort,
+  ) {}
 
   async handle(event: UserLoggedInEvent): Promise<void> {
     await this.audit.log({

@@ -2,7 +2,10 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { jwtVerify } from 'jose';
 
-import { AuthProviderPort, AuthSession } from '../../application/ports/auth-provider.port';
+import {
+  AuthProviderPort,
+  AuthSession,
+} from '../../application/ports/auth-provider.port';
 import { SupabaseClientFactory } from './supabase.client-factory';
 import {
   InvalidCredentialsException,
@@ -51,7 +54,10 @@ export class SupabaseAuthAdapter implements AuthProviderPort {
     };
   }
 
-  async loginWithPassword(email: string, password: string): Promise<AuthSession> {
+  async loginWithPassword(
+    email: string,
+    password: string,
+  ): Promise<AuthSession> {
     const { data, error } = await this.clients.anon().auth.signInWithPassword({
       email,
       password,
@@ -105,9 +111,12 @@ export class SupabaseAuthAdapter implements AuthProviderPort {
       }
 
       const email = (payload['email'] as string) ?? '';
+      const userMetadata = payload['user_metadata'] as
+        | { email_verified?: boolean }
+        | undefined;
       const emailVerified =
-        (payload['email_verified'] as boolean) ??
-        ((payload['user_metadata'] as any)?.email_verified as boolean) ??
+        (payload['email_verified'] as boolean | undefined) ??
+        userMetadata?.email_verified ??
         false;
 
       return {
@@ -117,18 +126,26 @@ export class SupabaseAuthAdapter implements AuthProviderPort {
         exp: payload.exp ?? 0,
         iat: payload.iat ?? 0,
         emailVerified,
-        appMetadata: payload['app_metadata'] as Record<string, unknown> | undefined,
-        userMetadata: payload['user_metadata'] as Record<string, unknown> | undefined,
+        appMetadata: payload['app_metadata'] as
+          | Record<string, unknown>
+          | undefined,
+        userMetadata: payload['user_metadata'] as
+          | Record<string, unknown>
+          | undefined,
       };
     } catch (err) {
       throw new InvalidTokenException(
-        err instanceof Error && err.message ? err.message : 'Token verification failed.',
+        err instanceof Error && err.message
+          ? err.message
+          : 'Token verification failed.',
       );
     }
   }
 
   async getUserByAuthId(supabaseAuthId: string) {
-    const { data, error } = await this.clients.admin().auth.admin.getUserById(supabaseAuthId);
+    const { data, error } = await this.clients
+      .admin()
+      .auth.admin.getUserById(supabaseAuthId);
     if (error || !data?.user) {
       return null;
     }
@@ -144,7 +161,9 @@ export class SupabaseAuthAdapter implements AuthProviderPort {
   async signOut(accessToken: string): Promise<void> {
     // Revoke the session via admin API. The user's access token cannot be invalidated mid-flight
     // (JWTs are stateless) but the refresh token becomes useless.
-    const { error } = await this.clients.anon().auth.signOut({ scope: 'global' });
+    const { error } = await this.clients
+      .anon()
+      .auth.signOut({ scope: 'global' });
     if (error) {
       this.logger.warn({ err: error.message }, 'Sign out reported an error');
     }
@@ -153,26 +172,38 @@ export class SupabaseAuthAdapter implements AuthProviderPort {
     void accessToken;
   }
 
-  async requestPasswordReset(email: string, redirectTo?: string): Promise<void> {
-    const { error } = await this.clients.anon().auth.resetPasswordForEmail(email, {
-      redirectTo,
-    });
+  async requestPasswordReset(
+    email: string,
+    redirectTo?: string,
+  ): Promise<void> {
+    const { error } = await this.clients
+      .anon()
+      .auth.resetPasswordForEmail(email, {
+        redirectTo,
+      });
     if (error) {
       this.logger.warn({ err: error.message }, 'Password reset request failed');
       // Do NOT leak whether the email is registered — return success regardless.
     }
   }
 
-  async updatePassword(accessToken: string, newPassword: string): Promise<void> {
+  async updatePassword(
+    accessToken: string,
+    newPassword: string,
+  ): Promise<void> {
     const supabase = this.clients.anon();
     const { error: sessionErr } = await supabase.auth.setSession({
       access_token: accessToken,
       refresh_token: '',
     });
     if (sessionErr) {
-      throw new InvalidTokenException('Password reset token invalid or expired.');
+      throw new InvalidTokenException(
+        'Password reset token invalid or expired.',
+      );
     }
-    const { error: updateErr } = await supabase.auth.updateUser({ password: newPassword });
+    const { error: updateErr } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
     if (updateErr) {
       throw new InvalidTokenException(updateErr.message);
     }

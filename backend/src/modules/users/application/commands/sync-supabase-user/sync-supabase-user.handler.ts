@@ -2,23 +2,34 @@ import { CommandHandler, ICommandHandler, EventBus } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
 
 import { SyncSupabaseUserCommand } from './sync-supabase-user.command';
-import { USER_REPOSITORY, type UserRepository } from '../../../domain/repositories/user.repository';
+import {
+  USER_REPOSITORY,
+  type UserRepository,
+} from '../../../domain/repositories/user.repository';
 import { UserCreatedEvent } from '../../../domain/events/user-created.event';
 import { User } from '../../../domain/entities/user.entity';
 
 @CommandHandler(SyncSupabaseUserCommand)
-export class SyncSupabaseUserHandler implements ICommandHandler<SyncSupabaseUserCommand, User> {
+export class SyncSupabaseUserHandler implements ICommandHandler<
+  SyncSupabaseUserCommand,
+  User
+> {
   constructor(
     @Inject(USER_REPOSITORY) private readonly users: UserRepository,
     private readonly eventBus: EventBus,
   ) {}
 
   async execute(command: SyncSupabaseUserCommand): Promise<User> {
-    const existing = await this.users.findBySupabaseAuthId(command.supabaseAuthId);
+    const existing = await this.users.findBySupabaseAuthId(
+      command.supabaseAuthId,
+    );
     if (existing) {
       // idempotent — return existing user, optionally update email-verified if newly verified
       if (command.emailVerifiedAt && !existing.isEmailVerified()) {
-        await this.users.markEmailVerified(existing.id, command.emailVerifiedAt);
+        await this.users.markEmailVerified(
+          existing.id,
+          command.emailVerifiedAt,
+        );
         return (await this.users.findById(existing.id))!;
       }
       return existing;
@@ -31,7 +42,9 @@ export class SyncSupabaseUserHandler implements ICommandHandler<SyncSupabaseUser
       emailVerifiedAt: command.emailVerifiedAt,
     });
 
-    this.eventBus.publish(new UserCreatedEvent(user.id, user.supabaseAuthId, user.email));
+    this.eventBus.publish(
+      new UserCreatedEvent(user.id, user.supabaseAuthId, user.email),
+    );
     return user;
   }
 }

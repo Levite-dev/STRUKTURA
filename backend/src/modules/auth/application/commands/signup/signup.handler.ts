@@ -1,8 +1,16 @@
-import { CommandBus, CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
+import {
+  CommandBus,
+  CommandHandler,
+  EventBus,
+  ICommandHandler,
+} from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
 
 import { SignupCommand } from './signup.command';
-import { AUTH_PROVIDER_PORT, type AuthProviderPort } from '../../ports/auth-provider.port';
+import {
+  AUTH_PROVIDER_PORT,
+  type AuthProviderPort,
+} from '../../ports/auth-provider.port';
 import { SyncSupabaseUserCommand } from '../../../../users/application/commands/sync-supabase-user/sync-supabase-user.command';
 import { UserSignedUpEvent } from '../../../domain/events/user-signed-up.event';
 import { User } from '../../../../users/domain/entities/user.entity';
@@ -14,7 +22,10 @@ export interface SignupResult {
 }
 
 @CommandHandler(SignupCommand)
-export class SignupHandler implements ICommandHandler<SignupCommand, SignupResult> {
+export class SignupHandler implements ICommandHandler<
+  SignupCommand,
+  SignupResult
+> {
   constructor(
     @Inject(AUTH_PROVIDER_PORT) private readonly authProvider: AuthProviderPort,
     private readonly commandBus: CommandBus,
@@ -40,7 +51,12 @@ export class SignupHandler implements ICommandHandler<SignupCommand, SignupResul
 
     // 3. Emit audit event.
     this.eventBus.publish(
-      new UserSignedUpEvent(user.id, user.email, command.ipAddress, command.userAgent),
+      new UserSignedUpEvent(
+        user.id,
+        user.email,
+        command.ipAddress,
+        command.userAgent,
+      ),
     );
 
     return {

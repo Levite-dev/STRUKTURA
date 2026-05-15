@@ -11,9 +11,10 @@ import { OnboardingNotFoundException } from '../../../domain/exceptions/onboardi
 import { AssignRoleCommand } from '../../../../users/application/commands/assign-role/assign-role.command';
 
 @CommandHandler(ApproveOnboardingCommand)
-export class ApproveOnboardingHandler
-  implements ICommandHandler<ApproveOnboardingCommand, OnboardingState>
-{
+export class ApproveOnboardingHandler implements ICommandHandler<
+  ApproveOnboardingCommand,
+  OnboardingState
+> {
   constructor(
     @Inject(ONBOARDING_STATE_REPOSITORY)
     private readonly states: OnboardingStateRepository,

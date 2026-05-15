@@ -9,7 +9,10 @@ import {
 } from '../../ports/auth-provider.port';
 
 @CommandHandler(RefreshTokenCommand)
-export class RefreshTokenHandler implements ICommandHandler<RefreshTokenCommand, AuthSession> {
+export class RefreshTokenHandler implements ICommandHandler<
+  RefreshTokenCommand,
+  AuthSession
+> {
   constructor(
     @Inject(AUTH_PROVIDER_PORT) private readonly authProvider: AuthProviderPort,
   ) {}

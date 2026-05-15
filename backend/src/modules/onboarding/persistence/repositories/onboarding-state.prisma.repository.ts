@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Role } from '@prisma/client';
+import { Prisma, Role } from '@prisma/client';
 
 import { PrismaService } from '../../../../shared/infrastructure/prisma/prisma.service';
 import { OnboardingState } from '../../domain/entities/onboarding-state.entity';
@@ -10,7 +10,10 @@ import { OnboardingStateMapper } from '../mappers/onboarding-state.mapper';
 export class OnboardingStatePrismaRepository implements OnboardingStateRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findByUserAndRole(userId: string, role: Role): Promise<OnboardingState | null> {
+  async findByUserAndRole(
+    userId: string,
+    role: Role,
+  ): Promise<OnboardingState | null> {
     const record = await this.prisma.onboardingState.findUnique({
       where: { userId_role: { userId, role } },
     });
@@ -18,11 +21,16 @@ export class OnboardingStatePrismaRepository implements OnboardingStateRepositor
   }
 
   async findById(id: string): Promise<OnboardingState | null> {
-    const record = await this.prisma.onboardingState.findUnique({ where: { id } });
+    const record = await this.prisma.onboardingState.findUnique({
+      where: { id },
+    });
     return record ? OnboardingStateMapper.toDomain(record) : null;
   }
 
-  async createForUserRole(userId: string, role: Role): Promise<OnboardingState> {
+  async createForUserRole(
+    userId: string,
+    role: Role,
+  ): Promise<OnboardingState> {
     const record = await this.prisma.onboardingState.create({
       data: {
         userId,
@@ -42,7 +50,7 @@ export class OnboardingStatePrismaRepository implements OnboardingStateRepositor
       data: {
         status: props.status,
         currentStep: props.currentStep,
-        data: props.data as any,
+        data: props.data as Prisma.InputJsonValue,
         startedAt: props.startedAt,
         completedAt: props.completedAt,
         rejectedAt: props.rejectedAt,

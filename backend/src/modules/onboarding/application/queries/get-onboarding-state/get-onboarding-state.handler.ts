@@ -9,9 +9,10 @@ import {
 import { OnboardingState } from '../../../domain/entities/onboarding-state.entity';
 
 @QueryHandler(GetOnboardingStateQuery)
-export class GetOnboardingStateHandler
-  implements IQueryHandler<GetOnboardingStateQuery, OnboardingState | null>
-{
+export class GetOnboardingStateHandler implements IQueryHandler<
+  GetOnboardingStateQuery,
+  OnboardingState | null
+> {
   constructor(
     @Inject(ONBOARDING_STATE_REPOSITORY)
     private readonly states: OnboardingStateRepository,

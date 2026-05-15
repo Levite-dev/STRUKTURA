@@ -43,6 +43,11 @@ const CommandHandlers = [
     EmailVerifiedGuard,
     ...CommandHandlers,
   ],
-  exports: [AUTH_PROVIDER_PORT, SupabaseJwtGuard, RolesGuard, EmailVerifiedGuard],
+  exports: [
+    AUTH_PROVIDER_PORT,
+    SupabaseJwtGuard,
+    RolesGuard,
+    EmailVerifiedGuard,
+  ],
 })
 export class AuthModule {}

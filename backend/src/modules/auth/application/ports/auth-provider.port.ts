@@ -10,7 +10,10 @@ export interface AuthSession {
 }
 
 export interface AuthProviderPort {
-  signupWithPassword(email: string, password: string): Promise<{
+  signupWithPassword(
+    email: string,
+    password: string,
+  ): Promise<{
     supabaseAuthId: string;
     email: string;
     emailConfirmedAt: Date | null;
@@ -24,7 +27,7 @@ export interface AuthProviderPort {
    * Verifies a Supabase access token. Returns decoded claims on success, throws on failure.
    */
   verifyAccessToken(token: string): Promise<{
-    sub: string;        // supabase auth id
+    sub: string; // supabase auth id
     email: string;
     aud: string;
     exp: number;

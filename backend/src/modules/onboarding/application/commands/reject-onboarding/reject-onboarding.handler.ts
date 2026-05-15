@@ -10,9 +10,10 @@ import { OnboardingState } from '../../../domain/entities/onboarding-state.entit
 import { OnboardingNotFoundException } from '../../../domain/exceptions/onboarding.exceptions';
 
 @CommandHandler(RejectOnboardingCommand)
-export class RejectOnboardingHandler
-  implements ICommandHandler<RejectOnboardingCommand, OnboardingState>
-{
+export class RejectOnboardingHandler implements ICommandHandler<
+  RejectOnboardingCommand,
+  OnboardingState
+> {
   constructor(
     @Inject(ONBOARDING_STATE_REPOSITORY)
     private readonly states: OnboardingStateRepository,

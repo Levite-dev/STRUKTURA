@@ -36,7 +36,10 @@ const QueryHandlers = [GetOnboardingStateHandler, ListPendingOnboardingHandler];
   controllers: [OnboardingController, AdminOnboardingController],
   providers: [
     OnboardingStatePrismaRepository,
-    { provide: ONBOARDING_STATE_REPOSITORY, useExisting: OnboardingStatePrismaRepository },
+    {
+      provide: ONBOARDING_STATE_REPOSITORY,
+      useExisting: OnboardingStatePrismaRepository,
+    },
     ProfilePrismaRepository,
     { provide: PROFILE_REPOSITORY, useExisting: ProfilePrismaRepository },
     PublicRoleParamPipe,

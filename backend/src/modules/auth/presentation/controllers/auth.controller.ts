@@ -112,9 +112,10 @@ export class AuthController {
     refreshToken: string;
     expiresAt: number;
   }> {
-    const session = await this.commandBus.execute<RefreshTokenCommand, AuthSession>(
-      new RefreshTokenCommand(dto.refreshToken),
-    );
+    const session = await this.commandBus.execute<
+      RefreshTokenCommand,
+      AuthSession
+    >(new RefreshTokenCommand(dto.refreshToken));
     return {
       accessToken: session.accessToken,
       refreshToken: session.refreshToken,
@@ -126,19 +127,26 @@ export class AuthController {
   @Throttle({ default: { ttl: 60_000, limit: 3 } })
   @Post('password-reset/request')
   @HttpCode(HttpStatus.ACCEPTED)
-  async requestPasswordReset(@Body() dto: RequestPasswordResetDto): Promise<{ message: string }> {
+  async requestPasswordReset(
+    @Body() dto: RequestPasswordResetDto,
+  ): Promise<{ message: string }> {
     await this.commandBus.execute(
       new RequestPasswordResetCommand(dto.email, dto.redirectTo),
     );
     // Always return success — do not leak whether email exists.
-    return { message: 'If an account exists for that email, a reset link has been sent.' };
+    return {
+      message:
+        'If an account exists for that email, a reset link has been sent.',
+    };
   }
 
   @Public()
   @Throttle({ default: { ttl: 60_000, limit: 5 } })
   @Post('password-reset/confirm')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async confirmPasswordReset(@Body() dto: ConfirmPasswordResetDto): Promise<void> {
+  async confirmPasswordReset(
+    @Body() dto: ConfirmPasswordResetDto,
+  ): Promise<void> {
     await this.commandBus.execute(
       new ConfirmPasswordResetCommand(dto.accessToken, dto.newPassword),
     );
@@ -156,17 +164,19 @@ export class AuthController {
     @Body() dto: OAuthCallbackDto,
     @Req() req: Request,
   ): Promise<{ user: UserResponseDto }> {
-    const result = await this.commandBus.execute<OAuthSyncCommand, OAuthSyncResult>(
-      new OAuthSyncCommand(dto.accessToken, getIp(req), getUserAgent(req)),
-    );
+    const result = await this.commandBus.execute<
+      OAuthSyncCommand,
+      OAuthSyncResult
+    >(new OAuthSyncCommand(dto.accessToken, getIp(req), getUserAgent(req)));
     return { user: UserResponseDto.fromDomain(result.user) };
   }
 }
 
 function getIp(req: Request): string | null {
   const forwarded = req.headers['x-forwarded-for'];
-  if (typeof forwarded === 'string') return forwarded.split(',')[0]!.trim();
-  if (Array.isArray(forwarded) && forwarded.length > 0) return forwarded[0]!.split(',')[0]!.trim();
+  if (typeof forwarded === 'string') return forwarded.split(',')[0].trim();
+  if (Array.isArray(forwarded) && forwarded.length > 0)
+    return forwarded[0].split(',')[0].trim();
   return req.ip ?? null;
 }
 
