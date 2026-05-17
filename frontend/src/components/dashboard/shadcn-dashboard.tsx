@@ -15,6 +15,7 @@ const titleByRole: Record<Role, string> = {
   contractor: "Contractor",
   company: "Service company",
   admin: "Platform admin",
+  jobSeeker: "Job Seeker",
 }
 
 export function ShadcnDashboardShell({

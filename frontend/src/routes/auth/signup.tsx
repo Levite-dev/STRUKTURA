@@ -3,7 +3,7 @@ import { z } from "zod"
 import { SignupPage, type SignupRole } from "@/components/auth/signup-page"
 
 const signupSearchSchema = z.object({
-  role: z.enum(["buyer", "seller", "contractor"]).optional(),
+  role: z.enum(["buyer", "seller"]).optional(),
 })
 
 export const Route = createFileRoute("/auth/signup")({

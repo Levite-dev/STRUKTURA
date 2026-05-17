@@ -70,139 +70,141 @@ export function ProductDetailPage({ product }: { product: Product }) {
   const thumbs = [product.image, product.image, product.image, product.image]
 
   return (
-    <div className="bg-white">
+    <div className="bg-background">
       <Header />
       <main className="mx-auto max-w-[1280px] px-6 py-12 sm:px-12 lg:px-20 xl:px-24">
-        <nav
-          aria-label="Breadcrumb"
-          className="mb-10 flex flex-wrap items-center gap-2 text-base font-medium text-brand-black/70"
-        >
-          <Link to="/" className="hover:text-brand-orange">
-            Home
-          </Link>
-          <span className="text-brand-black/40">/</span>
-          <Link to="/shop" className="hover:text-brand-orange">
-            Products
-          </Link>
-          <span className="text-brand-black/40">/</span>
-          <Link
-            to="/shop"
-            className="hover:text-brand-orange"
+        <div className="rounded-md border border-border bg-white p-6 shadow-sm sm:p-8 lg:p-10">
+          <nav
+            aria-label="Breadcrumb"
+            className="mb-10 flex flex-wrap items-center gap-2 text-base font-medium text-brand-black/70"
           >
-            {product.category}
-          </Link>
-          <span className="text-brand-black/40">/</span>
-          <span className="text-brand-orange">{product.name}</span>
-        </nav>
+            <Link to="/" className="hover:text-brand-orange">
+              Home
+            </Link>
+            <span className="text-brand-black/40">/</span>
+            <Link to="/shop" className="hover:text-brand-orange">
+              Products
+            </Link>
+            <span className="text-brand-black/40">/</span>
+            <Link
+              to="/shop"
+              className="hover:text-brand-orange"
+            >
+              {product.category}
+            </Link>
+            <span className="text-brand-black/40">/</span>
+            <span className="text-brand-orange">{product.name}</span>
+          </nav>
 
-        <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-          <div className="grid grid-cols-[88px_minmax(0,1fr)] gap-4">
-            <div className="flex flex-col gap-3">
-              {thumbs.map((src, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => setActiveImg(i)}
-                  className={cn(
-                    "aspect-square overflow-hidden border bg-muted transition-colors",
-                    activeImg === i ? "border-brand-orange" : "border-border hover:border-brand-black/30"
-                  )}
-                  aria-label={`View image ${i + 1}`}
-                >
-                  <img
-                    src={src}
-                    alt=""
-                    className={cn("size-full object-cover", activeImg === i ? "" : "opacity-80")}
-                  />
-                </button>
-              ))}
-            </div>
-            <div className="aspect-square overflow-hidden border border-border bg-muted">
-              <img
-                src={thumbs[activeImg]}
-                alt={product.name}
-                className="size-full object-cover"
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-col">
-            <h1 className="text-4xl font-bold tracking-tight text-brand-black sm:text-5xl">
-              {product.name}
-            </h1>
-
-            <div className="mt-3 flex items-center gap-2 text-brand-orange">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <HugeiconsIcon
-                  key={i}
-                  icon={StarIcon}
-                  className={cn(
-                    "size-5",
-                    i < ratingNum ? "text-brand-orange" : "text-brand-black/15"
-                  )}
-                />
-              ))}
-              <span className="ml-1 text-sm font-semibold text-brand-black/70">
-                ({product.reviews})
-              </span>
-            </div>
-
-            <div className="mt-8 flex flex-col gap-1">
-              {product.oldPrice && product.oldPrice > product.price && (
-                <span className="text-sm text-muted-foreground line-through">
-                  MRP: {peso(product.oldPrice)}
-                </span>
-              )}
-              <span className="text-3xl font-bold tracking-tight text-brand-black sm:text-4xl">
-                MRP: {peso(product.price)}
-              </span>
-              <span className="text-sm text-muted-foreground">(inclusive of all taxes)</span>
-            </div>
-
-            <div className="mt-8">
-              <h2 className="text-lg font-bold text-brand-black">About Product</h2>
-              <ul className="mt-3 space-y-2 text-sm text-brand-black/80">
-                {bullets.map((b, i) => (
-                  <li key={i} className="flex items-start gap-2">
-                    <span className="mt-1.5 inline-block size-1.5 rounded-full bg-brand-black/40" />
-                    {b}
-                  </li>
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+            <div className="grid grid-cols-[88px_minmax(0,1fr)] gap-4">
+              <div className="flex flex-col gap-3">
+                {thumbs.map((src, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => setActiveImg(i)}
+                    className={cn(
+                      "aspect-square overflow-hidden border bg-muted transition-colors",
+                      activeImg === i ? "border-brand-orange" : "border-border hover:border-brand-black/30"
+                    )}
+                    aria-label={`View image ${i + 1}`}
+                  >
+                    <img
+                      src={src}
+                      alt=""
+                      className={cn("size-full object-cover", activeImg === i ? "" : "opacity-80")}
+                    />
+                  </button>
                 ))}
-                <li className="flex items-start gap-2 text-brand-black/60">
-                  <span className="mt-1.5 inline-block size-1.5 rounded-full bg-brand-black/40" />
-                  Supplied by {product.supplier} · {product.unit}
-                </li>
-              </ul>
+              </div>
+              <div className="aspect-square overflow-hidden border border-border bg-muted">
+                <img
+                  src={thumbs[activeImg]}
+                  alt={product.name}
+                  className="size-full object-cover"
+                />
+              </div>
             </div>
 
-            <div className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <button
-                type="button"
-                onClick={onAdd}
-                className="h-14 bg-muted text-sm font-semibold tracking-wide text-brand-black transition-colors hover:bg-brand-black/10"
-              >
-                Add to Cart
-              </button>
-              <button
-                type="button"
-                onClick={onBuy}
-                className="inline-flex h-14 items-center justify-center gap-2 bg-brand-orange text-sm font-semibold tracking-wide text-white transition-colors hover:bg-brand-orange-soft"
-              >
-                Buy now
-                <HugeiconsIcon icon={ArrowRight01Icon} className="size-4" />
-              </button>
+            <div className="flex flex-col">
+              <h1 className="text-4xl font-bold tracking-tight text-brand-black sm:text-5xl">
+                {product.name}
+              </h1>
+
+              <div className="mt-3 flex items-center gap-2 text-brand-orange">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <HugeiconsIcon
+                    key={i}
+                    icon={StarIcon}
+                    className={cn(
+                      "size-5",
+                      i < ratingNum ? "text-brand-orange" : "text-brand-black/15"
+                    )}
+                  />
+                ))}
+                <span className="ml-1 text-sm font-semibold text-brand-black/70">
+                  ({product.reviews})
+                </span>
+              </div>
+
+              <div className="mt-8 flex flex-col gap-1">
+                {product.oldPrice && product.oldPrice > product.price && (
+                  <span className="text-sm text-muted-foreground line-through">
+                    MRP: {peso(product.oldPrice)}
+                  </span>
+                )}
+                <span className="text-3xl font-bold tracking-tight text-brand-black sm:text-4xl">
+                  MRP: {peso(product.price)}
+                </span>
+                <span className="text-sm text-muted-foreground">(inclusive of all taxes)</span>
+              </div>
+
+              <div className="mt-8">
+                <h2 className="text-lg font-bold text-brand-black">About Product</h2>
+                <ul className="mt-3 space-y-2 text-sm text-brand-black/80">
+                  {bullets.map((b, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <span className="mt-1.5 inline-block size-1.5 rounded-full bg-brand-black/40" />
+                      {b}
+                    </li>
+                  ))}
+                  <li className="flex items-start gap-2 text-brand-black/60">
+                    <span className="mt-1.5 inline-block size-1.5 rounded-full bg-brand-black/40" />
+                    Supplied by {product.supplier} · {product.unit}
+                  </li>
+                </ul>
+              </div>
+
+              <div className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <button
+                  type="button"
+                  onClick={onAdd}
+                  className="h-14 bg-muted text-sm font-semibold tracking-wide text-brand-black transition-colors hover:bg-brand-black/10"
+                >
+                  Add to Cart
+                </button>
+                <button
+                  type="button"
+                  onClick={onBuy}
+                  className="inline-flex h-14 items-center justify-center gap-2 bg-brand-orange text-sm font-semibold tracking-wide text-white transition-colors hover:bg-brand-orange-soft"
+                >
+                  Buy now
+                  <HugeiconsIcon icon={ArrowRight01Icon} className="size-4" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
-        <section className="mt-20 border-t border-border pt-12">
+        <section className="mt-20 rounded-md border border-border bg-white p-6 shadow-sm sm:p-8">
           <h2 className="text-2xl font-bold tracking-tight text-brand-black">
             Description
           </h2>
           <div className="mt-4 max-w-3xl space-y-4 text-sm leading-relaxed text-brand-black/75">
             <p>
               {product.name} from {product.supplier} is sourced and stocked through
-              STRUKTURA's verified supplier network. Every order is backed by
+              STRUKTURA&apos;s verified supplier network. Every order is backed by
               escrow-protected payment, so your funds are released only when the
               materials arrive in good condition. This product belongs to our{" "}
               {product.category.toLowerCase()} catalog and is suitable for both

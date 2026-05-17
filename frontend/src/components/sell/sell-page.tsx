@@ -96,7 +96,7 @@ const faqs = [
 export function SellPage({ initialRole = "seller" }: { initialRole?: SellRole }) {
   const [role, setRole] = useState<SellRole>(initialRole)
   return (
-    <main className="bg-white">
+    <main className="bg-background">
       <Hero role={role} setRole={setRole} />
       <RoleContent role={role} />
       <FAQ />
@@ -229,7 +229,7 @@ function RoleContent({ role }: { role: SellRole }) {
                 <div className="mt-7 flex flex-wrap items-center gap-3">
                   <Link
                     to="/auth/signup"
-                    search={{ role }}
+                    search={{ role: "seller" }}
                     className="inline-flex items-center gap-2 rounded-full bg-brand-orange px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-orange-soft"
                   >
                     {ctaLabel}
@@ -353,4 +353,3 @@ function FAQ() {
     </section>
   )
 }
-

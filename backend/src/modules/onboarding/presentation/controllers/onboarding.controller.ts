@@ -27,8 +27,8 @@ import { StartOnboardingCommand } from '../../application/commands/start-onboard
 import { SaveStepCommand } from '../../application/commands/save-step/save-step.command';
 import { SubmitOnboardingCommand } from '../../application/commands/submit-onboarding/submit-onboarding.command';
 import { GetOnboardingStateQuery } from '../../application/queries/get-onboarding-state/get-onboarding-state.query';
-import { OnboardingState } from '../../domain/entities/onboarding-state.entity';
 import { OnboardingNotFoundException } from '../../domain/exceptions/onboarding.exceptions';
+import { OnboardingProgressSnapshot } from '../../domain/repositories/onboarding-state.repository';
 
 @UseGuards(SupabaseJwtGuard, EmailVerifiedGuard)
 @Controller('onboarding')
@@ -46,7 +46,7 @@ export class OnboardingController {
   ): Promise<OnboardingStateResponseDto> {
     const state = await this.commandBus.execute<
       StartOnboardingCommand,
-      OnboardingState
+      OnboardingProgressSnapshot
     >(new StartOnboardingCommand(user.id, role));
     return OnboardingStateResponseDto.fromDomain(state);
   }
@@ -58,7 +58,7 @@ export class OnboardingController {
   ): Promise<OnboardingStateResponseDto> {
     const state = await this.queryBus.execute<
       GetOnboardingStateQuery,
-      OnboardingState | null
+      OnboardingProgressSnapshot | null
     >(new GetOnboardingStateQuery(user.id, role));
     if (!state) {
       throw new OnboardingNotFoundException();
@@ -74,7 +74,7 @@ export class OnboardingController {
   ): Promise<OnboardingStateResponseDto> {
     const state = await this.commandBus.execute<
       SaveStepCommand,
-      OnboardingState
+      OnboardingProgressSnapshot
     >(new SaveStepCommand(user.id, role, dto.step, dto.data));
     return OnboardingStateResponseDto.fromDomain(state);
   }
@@ -87,7 +87,7 @@ export class OnboardingController {
   ): Promise<OnboardingStateResponseDto> {
     const state = await this.commandBus.execute<
       SubmitOnboardingCommand,
-      OnboardingState
+      OnboardingProgressSnapshot
     >(new SubmitOnboardingCommand(user.id, role));
     return OnboardingStateResponseDto.fromDomain(state);
   }

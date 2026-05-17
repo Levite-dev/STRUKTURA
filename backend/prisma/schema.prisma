@@ -26,7 +26,28 @@ enum OnboardingStatus {
   REJECTED
 }
 
+enum OnboardingProgressStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  PAUSED
+  BLOCKED
+  SKIPPED
+  PENDING_VERIFICATION
+  REJECTED
+}
+
+enum OnboardingStepStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  SKIPPED
+  BLOCKED
+  FAILED
+}
+
 enum UserStatus {
+  PENDING
   ACTIVE
   SUSPENDED
   DELETED
@@ -43,30 +64,37 @@ enum VerificationLevel {
 // ─── Core User ────────────────────────────────────────────────────────────────
 
 model User {
-  id              String     @id @default(cuid())
-  supabaseAuthId  String     @unique
-  email           String     @unique
-  emailVerifiedAt DateTime?
-  fullName        String?
-  phone           String?
-  avatarUrl       String?
-  status          UserStatus @default(ACTIVE)
-  lastLoginAt     DateTime?
-  lastLoginIp     String?
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
+  id                    String                   @id @default(cuid())
+  supabaseAuthId        String                   @unique
+  email                 String                   @unique
+  emailVerifiedAt       DateTime?
+  fullName              String?
+  phone                 String?
+  avatarUrl             String?
+  status                UserStatus               @default(ACTIVE)
+  primaryRole           Role?
+  onboardingStatus      OnboardingProgressStatus @default(NOT_STARTED)
+  onboardingCompletedAt DateTime?
+  accountSetupStage     String?
+  lastLoginAt           DateTime?
+  lastLoginIp           String?
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
 
-  userRoles         UserRole[]
-  onboardingStates  OnboardingState[]
-  clientProfile     ClientProfile?
-  contractorProfile ContractorProfile?
-  supplierProfile   SupplierProfile?
-  jobSeekerProfile  JobSeekerProfile?
-  auditLogs         AuditLog[]
+  userRoles          UserRole[]
+  onboardingStates   OnboardingState[]
+  onboardingProgress UserOnboardingProgress[]
+  clientProfile      ClientProfile?
+  contractorProfile  ContractorProfile?
+  supplierProfile    SupplierProfile?
+  jobSeekerProfile   JobSeekerProfile?
+  auditLogs          AuditLog[]
 
   @@index([email])
   @@index([supabaseAuthId])
   @@index([status])
+  @@index([primaryRole])
+  @@index([onboardingStatus])
 }
 
 model UserRole {
@@ -76,7 +104,7 @@ model UserRole {
   assignedAt DateTime @default(now())
   assignedBy String?
 
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, role])
   @@index([role])
@@ -85,23 +113,127 @@ model UserRole {
 // ─── Onboarding ───────────────────────────────────────────────────────────────
 
 model OnboardingState {
-  id          String           @id @default(cuid())
-  userId      String
-  role        Role
-  status      OnboardingStatus @default(NOT_STARTED)
-  currentStep String?
-  data        Json             @default("{}")
-  startedAt   DateTime?
-  completedAt DateTime?
-  rejectedAt  DateTime?
+  id           String           @id @default(cuid())
+  userId       String
+  role         Role
+  status       OnboardingStatus @default(NOT_STARTED)
+  currentStep  String?
+  data         Json             @default("{}")
+  startedAt    DateTime?
+  completedAt  DateTime?
+  rejectedAt   DateTime?
   rejectReason String?
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
 
-  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, role])
   @@index([status])
+}
+
+model OnboardingFlow {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  name        String
+  description String?
+  targetRole  Role
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  steps        OnboardingStep[]
+  requirements OnboardingRequirement[]
+  progress     UserOnboardingProgress[]
+
+  @@index([targetRole, isActive])
+}
+
+model OnboardingStep {
+  id                 String   @id @default(cuid())
+  flowId             String
+  stepCode           String
+  title              String
+  description        String?
+  stepOrder          Int
+  isRequired         Boolean  @default(true)
+  isSkippable        Boolean  @default(false)
+  requiredPermission String?
+  estimatedMinutes   Int?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  flow               OnboardingFlow               @relation(fields: [flowId], references: [id], onDelete: Cascade)
+  requirements       OnboardingRequirement[]
+  stepProgress       UserOnboardingStepProgress[]
+  currentForProgress UserOnboardingProgress[]     @relation("CurrentOnboardingStep")
+
+  @@unique([flowId, stepCode])
+  @@unique([flowId, stepOrder])
+  @@index([stepCode])
+}
+
+model UserOnboardingProgress {
+  id                   String                   @id @default(cuid())
+  userId               String
+  flowId               String
+  currentStepId        String?
+  status               OnboardingProgressStatus @default(NOT_STARTED)
+  completionPercentage Int                      @default(0)
+  startedAt            DateTime?
+  completedAt          DateTime?
+  skippedAt            DateTime?
+  lastActivityAt       DateTime?
+  rejectionReason      String?
+  createdAt            DateTime                 @default(now())
+  updatedAt            DateTime                 @updatedAt
+
+  user         User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  flow         OnboardingFlow               @relation(fields: [flowId], references: [id], onDelete: Cascade)
+  currentStep  OnboardingStep?              @relation("CurrentOnboardingStep", fields: [currentStepId], references: [id], onDelete: SetNull)
+  stepProgress UserOnboardingStepProgress[]
+
+  @@unique([userId, flowId])
+  @@index([status])
+  @@index([currentStepId])
+}
+
+model UserOnboardingStepProgress {
+  id                       String               @id @default(cuid())
+  userOnboardingProgressId String
+  stepId                   String
+  status                   OnboardingStepStatus @default(PENDING)
+  completedAt              DateTime?
+  skippedAt                DateTime?
+  blockedReason            String?
+  metadataJson             Json                 @default("{}")
+  createdAt                DateTime             @default(now())
+  updatedAt                DateTime             @updatedAt
+
+  progress UserOnboardingProgress @relation(fields: [userOnboardingProgressId], references: [id], onDelete: Cascade)
+  step     OnboardingStep         @relation(fields: [stepId], references: [id], onDelete: Cascade)
+
+  @@unique([userOnboardingProgressId, stepId])
+  @@index([status])
+}
+
+model OnboardingRequirement {
+  id                 String   @id @default(cuid())
+  flowId             String
+  stepId             String?
+  requirementCode    String
+  name               String
+  description        String?
+  isRequired         Boolean  @default(true)
+  validationRuleJson Json?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  flow OnboardingFlow  @relation(fields: [flowId], references: [id], onDelete: Cascade)
+  step OnboardingStep? @relation(fields: [stepId], references: [id], onDelete: Cascade)
+
+  @@unique([flowId, requirementCode])
+  @@index([stepId])
 }
 
 // ─── Role-specific profiles ───────────────────────────────────────────────────
@@ -109,65 +241,117 @@ model OnboardingState {
 model ClientProfile {
   id                  String   @id @default(cuid())
   userId              String   @unique
+  firstName           String?
+  lastName            String?
+  phone               String?
   region              String?
   city                String?
+  province            String?
   address             String?
   preferredCategories String[]
+  interestedServices  String[]
+  preferredLocation   String?
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 
-  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model ContractorProfile {
-  id                String            @id @default(cuid())
-  userId            String            @unique
-  trade             String
-  yearsExperience   Int
-  bio               String?
-  expertiseTags     String[]
-  location          String?
-  verificationLevel VerificationLevel @default(UNVERIFIED)
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
+  id                    String            @id @default(cuid())
+  userId                String            @unique
+  businessName          String?
+  businessDescription   String?
+  serviceArea           String?
+  serviceCategories     String[]
+  trade                 String            @default("")
+  yearsExperience       Int
+  bio                   String?
+  expertiseTags         String[]
+  location              String?
+  city                  String?
+  province              String?
+  contactPerson         String?
+  contactNumber         String?
+  businessEmail         String?
+  profileImageUrl       String?
+  coverImageUrl         String?
+  portfolioFiles        Json?
+  verificationDocuments Json?
+  verificationLevel     VerificationLevel @default(UNVERIFIED)
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
 
-  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([trade])
   @@index([verificationLevel])
 }
 
 model SupplierProfile {
-  id              String    @id @default(cuid())
-  userId          String    @unique
-  businessName    String
-  businessAddress String
-  businessRegNo   String?
-  taxId           String?
-  payoutBankName  String?
-  payoutAcctName  String?
-  payoutAcctNo    String?
-  verifiedAt      DateTime?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id                    String    @id @default(cuid())
+  userId                String    @unique
+  businessName          String
+  storeName             String?
+  businessDescription   String?
+  contactPerson         String?
+  contactNumber         String?
+  businessEmail         String?
+  businessAddress       String
+  city                  String?
+  province              String?
+  profileImageUrl       String?
+  coverImageUrl         String?
+  businessRegNo         String?
+  businessType          String?
+  taxId                 String?
+  yearsOperating        Int?
+  operatingHours        String?
+  deliveryAreas         String[]
+  productCategory       String?
+  firstProduct          String?
+  inventoryStock        Int?
+  verificationDocuments Json?
+  deliveryAvailable     Boolean?
+  pickupAvailable       Boolean?
+  payoutBankName        String?
+  payoutAcctName        String?
+  payoutAcctNo          String?
+  verifiedAt            DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([businessName])
 }
 
 model JobSeekerProfile {
-  id                 String    @id @default(cuid())
-  userId             String    @unique
-  skills             String[]
-  yearsExperience    Int
-  preferredLocations String[]
-  availableFrom      DateTime?
-  resumeUrl          String?
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
+  id                    String    @id @default(cuid())
+  userId                String    @unique
+  firstName             String?
+  lastName              String?
+  location              String?
+  primarySkill          String?
+  additionalSkills      String[]
+  skills                String[]
+  yearsExperience       Int
+  preferredLocations    String[]
+  preferredWorkType     String?
+  expectedDailyRate     Decimal?
+  expectedProjectRate   Decimal?
+  willingToTravel       Boolean?
+  toolsOwned            String[]
+  experienceDescription String?
+  portfolioFiles        Json?
+  verificationDocuments Json?
+  availabilityStatus    String?
+  availableFrom         DateTime?
+  resumeUrl             String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
-  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 // ─── Audit Trail (append-only) ────────────────────────────────────────────────
@@ -187,7 +371,7 @@ model AuditLog {
   metadata    Json?
   createdAt   DateTime @default(now())
 
-  actor       User?    @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+  actor User? @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
 
   @@index([actorUserId])
   @@index([action])

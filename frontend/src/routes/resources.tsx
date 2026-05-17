@@ -12,7 +12,7 @@ export const Route = createFileRoute("/resources")({
 
 function ResourcesPage() {
   return (
-    <main className="bg-white">
+    <main className="bg-background">
       <Header />
       <ResourcesHero />
       <PostGrid />

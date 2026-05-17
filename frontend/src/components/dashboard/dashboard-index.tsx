@@ -67,7 +67,7 @@ export function DashboardIndex() {
   const { setRole } = useRole()
 
   return (
-    <div className="bg-white">
+    <div className="bg-background">
       <Header />
       <main className="mx-auto max-w-[1280px] px-4 pt-32 pb-20 sm:px-6 lg:px-8">
         <div className="max-w-2xl">

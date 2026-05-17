@@ -17,7 +17,7 @@ function PricingPage() {
   const [billing, setBilling] = useBilling()
 
   return (
-    <main className="bg-white">
+    <main className="bg-background">
       <Header />
       <PricingHero billing={billing} onChange={setBilling} />
       <PricingTiers billing={billing} />

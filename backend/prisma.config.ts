@@ -12,8 +12,9 @@ export default defineConfig({
     path: "prisma/migrations",
   },
   datasource: {
-    // Use DIRECT_URL for migrations (port 5432) to avoid pgbouncer DDL issues;
-    // fall back to DATABASE_URL for runtime queries (pgbouncer pooler).
+    // Use session-mode pooler (port 5432) for migrations.
+    // Direct connections to db.*.supabase.co are unreachable from this network.
+    // Transaction-mode pooler (port 6543) does not support DDL required by migrations.
     url: process.env["DIRECT_URL"] || process.env["DATABASE_URL"],
   },
 });

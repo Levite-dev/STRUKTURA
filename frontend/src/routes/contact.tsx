@@ -12,7 +12,7 @@ export const Route = createFileRoute("/contact")({
 
 function ContactPage() {
   return (
-    <main className="bg-white">
+    <main className="bg-background">
       <Header />
       <ContactHero />
       <ContactGrid />

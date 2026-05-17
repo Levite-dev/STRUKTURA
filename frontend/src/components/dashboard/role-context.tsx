@@ -6,7 +6,7 @@ import {
   useState,
 } from "react"
 
-export type Role = "client" | "seller" | "contractor" | "company" | "admin"
+export type Role = "client" | "seller" | "contractor" | "company" | "admin" | "jobSeeker"
 
 const STORAGE_KEY = "struktura:role:v1"
 
@@ -53,4 +53,5 @@ export const roleLabels: Record<Role, string> = {
   contractor: "Contractor",
   company: "Service Company",
   admin: "Platform Admin",
+  jobSeeker: "Job Seeker",
 }

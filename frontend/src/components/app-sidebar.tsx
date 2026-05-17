@@ -43,6 +43,7 @@ const userByRole: Record<Role, { name: string; email: string; avatar: string }> 
   contractor: { name: "Stormshield Roofing", email: "ops@stormshield.ph", avatar: "/avatars/shadcn.jpg" },
   company: { name: "Studio Manille", email: "studio@manille.ph", avatar: "/avatars/shadcn.jpg" },
   admin: { name: "Platform Admin", email: "admin@struktura.ph", avatar: "/avatars/shadcn.jpg" },
+  jobSeeker: { name: "Maria Santos", email: "maria@example.ph", avatar: "/avatars/shadcn.jpg" },
 }
 
 type NavItem = {
@@ -114,6 +115,17 @@ const navByRole: Record<Role, { primary: NavItem[]; secondary: NavItem[] }> = {
     secondary: [
       { title: "Messages", to: "/messages", icon: Mail01Icon },
       { title: "Settings", to: "/dashboard/admin/settings", icon: Settings05Icon },
+    ],
+  },
+  jobSeeker: {
+    primary: [
+      { title: "Overview", to: "/dashboard/job-seeker", icon: DashboardSquare01Icon },
+      { title: "Find jobs", to: "/jobs", icon: Search01Icon },
+      { title: "My applications", to: "/dashboard/job-seeker/applications", icon: Briefcase01Icon },
+    ],
+    secondary: [
+      { title: "Messages", to: "/messages", icon: Mail01Icon },
+      { title: "Settings", to: "/dashboard/job-seeker/settings", icon: Settings05Icon },
     ],
   },
 }

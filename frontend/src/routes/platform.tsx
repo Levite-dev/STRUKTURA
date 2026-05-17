@@ -14,7 +14,7 @@ export const Route = createFileRoute("/platform")({
 
 function PlatformPage() {
   return (
-    <main className="bg-white">
+    <main className="bg-background">
       <Header />
       <PlatformHero />
       <CapabilityNav />

@@ -7,17 +7,41 @@ import {
   ArrowRight01Icon,
   ViewIcon,
   ViewOffSlashIcon,
-  GoogleIcon,
-  AppleIcon,
 } from "@hugeicons/core-free-icons"
+import { useAuth } from "@/lib/auth-context"
 import { AuthShell } from "./auth-shell"
 
 export function LoginPage() {
   const navigate = useNavigate()
+  const { signIn, onboardingStates } = useAuth()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPw, setShowPw] = useState(false)
-  const [remember, setRemember] = useState(true)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError("")
+    setLoading(true)
+    try {
+      await signIn(email, password)
+      const inProgress = onboardingStates.find(
+        (s) => s.status === "IN_PROGRESS" || s.status === "NOT_STARTED",
+      )
+      if (inProgress) {
+        navigate({ to: "/onboarding/$role", params: { role: inProgress.role } })
+      } else if (onboardingStates.length === 0) {
+        navigate({ to: "/onboarding/role-select" })
+      } else {
+        navigate({ to: "/dashboard" })
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong")
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <AuthShell
@@ -35,25 +59,10 @@ export function LoginPage() {
         </>
       }
     >
-      <form
-        onSubmit={(e) => {
-          e.preventDefault()
-          // Auth backend wires here later (Supabase Auth via Nest proxy).
-          navigate({ to: "/" })
-        }}
-        className="space-y-5"
-      >
-        <div className="grid grid-cols-2 gap-3">
-          <SocialButton icon={GoogleIcon} label="Google" />
-          <SocialButton icon={AppleIcon} label="Apple" />
-        </div>
-
-        <div className="relative my-2 text-center">
-          <span className="absolute inset-x-0 top-1/2 h-px bg-brand-black/10" />
-          <span className="relative bg-white px-3 text-[10px] tracking-[0.25em] text-brand-black/50 uppercase">
-            or
-          </span>
-        </div>
+      <form onSubmit={handleSubmit} className="space-y-5">
+        {error && (
+          <p className="text-sm text-destructive">{error}</p>
+        )}
 
         <Field label="Email">
           <InputWithIcon
@@ -86,20 +95,12 @@ export function LoginPage() {
           />
         </Field>
 
-        <label className="flex items-center gap-2 text-xs text-brand-black/75">
-          <input
-            type="checkbox"
-            checked={remember}
-            onChange={(e) => setRemember(e.target.checked)}
-            className="size-4 rounded border-brand-black/20 text-brand-orange focus:ring-brand-orange/40"
-          />
-          Keep me signed in for 30 days
-        </label>
-
         <button
           type="submit"
-          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-orange py-3.5 text-sm font-semibold text-white transition-colors hover:bg-brand-orange-soft"
+          disabled={loading}
+          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-orange py-3.5 text-sm font-semibold text-white transition-colors hover:bg-brand-orange-soft disabled:cursor-not-allowed disabled:opacity-50"
         >
+          {loading && <span className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />}
           Sign in
           <HugeiconsIcon icon={ArrowRight01Icon} className="size-3.5" />
         </button>
@@ -185,23 +186,5 @@ function PasswordField({
         />
       </button>
     </div>
-  )
-}
-
-function SocialButton({
-  icon,
-  label,
-}: {
-  icon: typeof GoogleIcon
-  label: string
-}) {
-  return (
-    <button
-      type="button"
-      className="inline-flex items-center justify-center gap-2 rounded-md border border-brand-black/15 bg-white px-4 py-2.5 text-sm font-semibold text-brand-black transition-colors hover:border-brand-orange/40 hover:bg-brand-orange/5"
-    >
-      <HugeiconsIcon icon={icon} className="size-4" />
-      {label}
-    </button>
   )
 }

@@ -24,9 +24,9 @@ export function AuthShell({
   bottomPrompt: React.ReactNode
 }) {
   return (
-    <main className="min-h-svh bg-white">
+    <main className="min-h-svh bg-background">
       <div className="grid min-h-svh lg:grid-cols-[1.05fr_1fr]">
-        <section className="flex flex-col px-6 py-10 sm:px-12 sm:py-14 lg:px-16">
+        <section className="flex flex-col bg-background px-6 py-10 sm:px-12 sm:py-14 lg:px-16">
           <Link
             to="/"
             className="inline-flex items-center gap-2 self-start"

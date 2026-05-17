@@ -75,7 +75,7 @@ export function PostServicePage({
     setForm((f) => ({ ...f, [key]: value }))
 
   return (
-    <main className="bg-white">
+    <main className="bg-background">
       <Hero />
 
       <section className="bg-[#f5f3ef] pb-16 sm:pb-20 lg:pb-24">

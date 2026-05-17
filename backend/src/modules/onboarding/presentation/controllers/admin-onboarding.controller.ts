@@ -24,7 +24,7 @@ import { OnboardingStateResponseDto } from '../http/response-dtos/onboarding-sta
 import { ApproveOnboardingCommand } from '../../application/commands/approve-onboarding/approve-onboarding.command';
 import { RejectOnboardingCommand } from '../../application/commands/reject-onboarding/reject-onboarding.command';
 import { ListPendingOnboardingQuery } from '../../application/queries/list-pending-onboarding/list-pending-onboarding.query';
-import { OnboardingState } from '../../domain/entities/onboarding-state.entity';
+import { OnboardingProgressSnapshot } from '../../domain/repositories/onboarding-state.repository';
 
 @UseGuards(SupabaseJwtGuard, RolesGuard)
 @Roles(Role.ADMIN, Role.MODERATOR)
@@ -39,7 +39,7 @@ export class AdminOnboardingController {
   async listPending(): Promise<OnboardingStateResponseDto[]> {
     const states = await this.queryBus.execute<
       ListPendingOnboardingQuery,
-      OnboardingState[]
+      OnboardingProgressSnapshot[]
     >(new ListPendingOnboardingQuery());
     return states.map((s) => OnboardingStateResponseDto.fromDomain(s));
   }
@@ -52,7 +52,7 @@ export class AdminOnboardingController {
   ): Promise<OnboardingStateResponseDto> {
     const state = await this.commandBus.execute<
       ApproveOnboardingCommand,
-      OnboardingState
+      OnboardingProgressSnapshot
     >(new ApproveOnboardingCommand(id, admin.id));
     return OnboardingStateResponseDto.fromDomain(state);
   }
@@ -66,7 +66,7 @@ export class AdminOnboardingController {
   ): Promise<OnboardingStateResponseDto> {
     const state = await this.commandBus.execute<
       RejectOnboardingCommand,
-      OnboardingState
+      OnboardingProgressSnapshot
     >(new RejectOnboardingCommand(id, admin.id, dto.reason));
     return OnboardingStateResponseDto.fromDomain(state);
   }

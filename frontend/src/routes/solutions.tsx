@@ -13,7 +13,7 @@ export const Route = createFileRoute("/solutions")({
 
 function SolutionsPage() {
   return (
-    <main className="bg-white">
+    <main className="bg-background">
       <Header />
       <SolutionsHero />
       <PersonaGrid />

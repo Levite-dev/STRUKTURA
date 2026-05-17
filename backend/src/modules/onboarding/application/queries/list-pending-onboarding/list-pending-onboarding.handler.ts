@@ -4,21 +4,21 @@ import { Inject } from '@nestjs/common';
 import { ListPendingOnboardingQuery } from './list-pending-onboarding.query';
 import {
   ONBOARDING_STATE_REPOSITORY,
+  OnboardingProgressSnapshot,
   type OnboardingStateRepository,
 } from '../../../domain/repositories/onboarding-state.repository';
-import { OnboardingState } from '../../../domain/entities/onboarding-state.entity';
 
 @QueryHandler(ListPendingOnboardingQuery)
 export class ListPendingOnboardingHandler implements IQueryHandler<
   ListPendingOnboardingQuery,
-  OnboardingState[]
+  OnboardingProgressSnapshot[]
 > {
   constructor(
     @Inject(ONBOARDING_STATE_REPOSITORY)
     private readonly states: OnboardingStateRepository,
   ) {}
 
-  execute(): Promise<OnboardingState[]> {
+  execute(): Promise<OnboardingProgressSnapshot[]> {
     return this.states.listPending();
   }
 }

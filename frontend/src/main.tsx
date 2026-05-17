@@ -5,11 +5,14 @@ import { RouterProvider } from "@tanstack/react-router"
 import "./index.css"
 import { router } from "@/router"
 import { ThemeProvider } from "@/components/theme-provider"
+import { AuthProvider } from "@/lib/auth-context"
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ThemeProvider defaultTheme="light">
-      <RouterProvider router={router} />
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
     </ThemeProvider>
-  </StrictMode>
+  </StrictMode>,
 )

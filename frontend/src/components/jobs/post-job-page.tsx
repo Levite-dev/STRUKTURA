@@ -69,7 +69,7 @@ export function PostJobPage({
     setForm((f) => ({ ...f, [key]: value }))
 
   return (
-    <main className="bg-white">
+    <main className="bg-background">
       <Hero />
 
       <section className="bg-[#f5f3ef] pt-16 pb-16 sm:pt-20 sm:pb-20 lg:pt-24 lg:pb-24">

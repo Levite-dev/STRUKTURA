@@ -4,6 +4,7 @@ import { Inject } from '@nestjs/common';
 import { SubmitOnboardingCommand } from './submit-onboarding.command';
 import {
   ONBOARDING_STATE_REPOSITORY,
+  OnboardingProgressSnapshot,
   type OnboardingStateRepository,
 } from '../../../domain/repositories/onboarding-state.repository';
 import {
@@ -11,15 +12,13 @@ import {
   type ProfileRepository,
   type ProfileInput,
 } from '../../../domain/repositories/profile.repository';
-import { OnboardingState } from '../../../domain/entities/onboarding-state.entity';
-import { OnboardingNotFoundException } from '../../../domain/exceptions/onboarding.exceptions';
 import { AssignRoleCommand } from '../../../../users/application/commands/assign-role/assign-role.command';
 import { buildProfileInput } from '../../services/profile-input.builder';
 
 @CommandHandler(SubmitOnboardingCommand)
 export class SubmitOnboardingHandler implements ICommandHandler<
   SubmitOnboardingCommand,
-  OnboardingState
+  OnboardingProgressSnapshot
 > {
   constructor(
     @Inject(ONBOARDING_STATE_REPOSITORY)
@@ -29,17 +28,13 @@ export class SubmitOnboardingHandler implements ICommandHandler<
     private readonly commandBus: CommandBus,
   ) {}
 
-  async execute(command: SubmitOnboardingCommand): Promise<OnboardingState> {
-    const state = await this.states.findByUserAndRole(
+  async execute(
+    command: SubmitOnboardingCommand,
+  ): Promise<OnboardingProgressSnapshot> {
+    const { state, autoCompleted } = await this.states.submit(
       command.userId,
       command.role,
     );
-    if (!state) {
-      throw new OnboardingNotFoundException();
-    }
-
-    const { autoCompleted } = state.submit();
-    const saved = await this.states.save(state);
 
     // Upsert the role-specific profile regardless of approval gate so admins reviewing
     // the submission see all collected data without re-running steps.
@@ -53,6 +48,6 @@ export class SubmitOnboardingHandler implements ICommandHandler<
       );
     }
 
-    return saved;
+    return state;
   }
 }

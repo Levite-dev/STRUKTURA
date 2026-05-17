@@ -11,47 +11,59 @@ import {
   ViewOffSlashIcon,
   ShoppingBag03Icon,
   Store02Icon,
-  Wrench01Icon,
 } from "@hugeicons/core-free-icons"
 import { cn } from "@/lib/utils"
+import { useAuth, type FrontendRole } from "@/lib/auth-context"
 import { AuthShell } from "./auth-shell"
 
-export type SignupRole = "buyer" | "seller" | "contractor"
+export type SignupRole = "buyer" | "seller"
 
 const roles: { id: SignupRole; label: string; tagline: string; icon: typeof ShoppingBag03Icon }[] = [
   {
     id: "buyer",
     label: "Buyer",
-    tagline: "Shop materials, hire builders",
+    tagline: "Shop construction materials",
     icon: ShoppingBag03Icon,
   },
   {
     id: "seller",
-    label: "Seller",
-    tagline: "List your materials catalog",
+    label: "Hardware Seller",
+    tagline: "List and manage products",
     icon: Store02Icon,
-  },
-  {
-    id: "contractor",
-    label: "Contractor",
-    tagline: "Win jobs, get paid via escrow",
-    icon: Wrench01Icon,
   },
 ]
 
 export function SignupPage({ initialRole = "buyer" }: { initialRole?: SignupRole }) {
   const navigate = useNavigate()
+  const { signUp } = useAuth()
   const [role, setRole] = useState<SignupRole>(initialRole)
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPw, setShowPw] = useState(false)
   const [agree, setAgree] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!agree) return
+    setError("")
+    setLoading(true)
+    try {
+      await signUp(email, password, name || undefined, role as FrontendRole)
+      navigate({ to: "/auth/verify-email" })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong")
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <AuthShell
       title="Create your account."
-      subtitle="One account works across buying, selling, and contracting."
+      subtitle="Choose whether you are buying construction materials or selling through the marketplace."
       bottomPrompt={
         <>
           Already have an account?{" "}
@@ -64,20 +76,12 @@ export function SignupPage({ initialRole = "buyer" }: { initialRole?: SignupRole
         </>
       }
     >
-      <form
-        onSubmit={(e) => {
-          e.preventDefault()
-          if (!agree) return
-          // Wires to Supabase Auth via Nest proxy (see backend ARCHITECTURE.md §5.1).
-          navigate({ to: "/" })
-        }}
-        className="space-y-6"
-      >
+      <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <p className="text-sm font-semibold text-brand-black">
             I&rsquo;m signing up as a…
           </p>
-          <div className="mt-3 grid grid-cols-3 gap-2">
+          <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
             {roles.map((r) => {
               const isActive = role === r.id
               return (
@@ -89,7 +93,7 @@ export function SignupPage({ initialRole = "buyer" }: { initialRole?: SignupRole
                     "relative flex flex-col items-center gap-1.5 rounded-md border px-3 py-4 text-center transition-colors",
                     isActive
                       ? "border-brand-orange bg-brand-orange/5"
-                      : "border-brand-black/15 bg-white hover:border-brand-orange/40"
+                      : "border-brand-black/15 bg-white hover:border-brand-orange/40",
                   )}
                 >
                   {isActive && (
@@ -104,7 +108,7 @@ export function SignupPage({ initialRole = "buyer" }: { initialRole?: SignupRole
                       "flex size-9 items-center justify-center rounded-full",
                       isActive
                         ? "bg-brand-orange text-white"
-                        : "bg-brand-orange/10 text-brand-orange"
+                        : "bg-brand-orange/10 text-brand-orange",
                     )}
                   >
                     <HugeiconsIcon icon={r.icon} className="size-4" />
@@ -128,7 +132,6 @@ export function SignupPage({ initialRole = "buyer" }: { initialRole?: SignupRole
             onChange={(e) => setName(e.target.value)}
             placeholder="Maria Santos"
             autoComplete="name"
-            required
           />
         </Field>
 
@@ -173,6 +176,10 @@ export function SignupPage({ initialRole = "buyer" }: { initialRole?: SignupRole
           </div>
         </Field>
 
+        {error && (
+          <p className="text-sm text-destructive">{error}</p>
+        )}
+
         <label className="flex items-start gap-2.5 text-xs text-brand-black/75">
           <input
             type="checkbox"
@@ -196,9 +203,10 @@ export function SignupPage({ initialRole = "buyer" }: { initialRole?: SignupRole
 
         <button
           type="submit"
-          disabled={!agree}
+          disabled={!agree || loading}
           className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-orange py-3.5 text-sm font-semibold text-white transition-colors hover:bg-brand-orange-soft disabled:cursor-not-allowed disabled:opacity-50"
         >
+          {loading && <span className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />}
           Create account
           <HugeiconsIcon icon={ArrowRight01Icon} className="size-3.5" />
         </button>

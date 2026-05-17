@@ -192,6 +192,40 @@ const statsByRole: Record<Role, Stat[]> = {
       sub: "BSP-compliant ledger",
     },
   ],
+  jobSeeker: [
+    {
+      label: "Applications sent",
+      value: "5",
+      delta: "+3",
+      trendUp: true,
+      hint: "This week",
+      sub: "Awaiting employer response",
+    },
+    {
+      label: "Interviews",
+      value: "2",
+      delta: "+1",
+      trendUp: true,
+      hint: "Scheduled",
+      sub: "Next: Thu 2PM",
+    },
+    {
+      label: "Profile views",
+      value: "28",
+      delta: "+12%",
+      trendUp: true,
+      hint: "Last 7 days",
+      sub: "By employers & contractors",
+    },
+    {
+      label: "Skills listed",
+      value: "8",
+      delta: "+2",
+      trendUp: true,
+      hint: "Verified",
+      sub: "Top match: Carpentry",
+    },
+  ],
 }
 
 export function RoleStats({ role }: { role: Role }) {

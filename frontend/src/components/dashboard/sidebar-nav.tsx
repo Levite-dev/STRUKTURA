@@ -65,6 +65,13 @@ const navByRole: Record<Role, NavItem[]> = {
     { label: "Reports", to: "/dashboard/admin/reports", icon: AnalyticsIcon },
     { label: "Settings", to: "/dashboard/admin/settings", icon: Settings01Icon },
   ],
+  jobSeeker: [
+    { label: "Overview", to: "/dashboard/job-seeker", icon: Home01Icon, activeOptions: { exact: true } },
+    { label: "Find jobs", to: "/jobs", icon: Briefcase01Icon },
+    { label: "My applications", to: "/dashboard/job-seeker/applications", icon: Calculator01Icon },
+    { label: "Settings", to: "/dashboard/job-seeker/settings", icon: Settings01Icon },
+    { label: "Messages", to: "/messages", icon: Mail01Icon },
+  ],
 }
 
 export function SidebarNav({ role }: { role: Role }) {

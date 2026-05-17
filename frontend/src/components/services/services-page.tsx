@@ -59,10 +59,10 @@ export function ServicesPage({
   }, [query, activeCategory, sort])
 
   return (
-    <main className="bg-white">
+    <main className="bg-background">
       <Hero query={query} setQuery={setQuery} />
 
-      <section className="bg-white pt-4 pb-16 sm:pt-6 sm:pb-20 lg:pb-24">
+      <section className="bg-background pt-4 pb-16 sm:pt-6 sm:pb-20 lg:pb-24">
         <div className="mx-auto max-w-[1280px] px-4 sm:px-6">
           <Reveal>
             <CategoryRail

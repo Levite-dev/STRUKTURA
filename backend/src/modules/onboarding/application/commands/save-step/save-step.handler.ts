@@ -4,30 +4,26 @@ import { Inject } from '@nestjs/common';
 import { SaveStepCommand } from './save-step.command';
 import {
   ONBOARDING_STATE_REPOSITORY,
+  OnboardingProgressSnapshot,
   type OnboardingStateRepository,
 } from '../../../domain/repositories/onboarding-state.repository';
-import { OnboardingState } from '../../../domain/entities/onboarding-state.entity';
-import { OnboardingNotFoundException } from '../../../domain/exceptions/onboarding.exceptions';
 
 @CommandHandler(SaveStepCommand)
 export class SaveStepHandler implements ICommandHandler<
   SaveStepCommand,
-  OnboardingState
+  OnboardingProgressSnapshot
 > {
   constructor(
     @Inject(ONBOARDING_STATE_REPOSITORY)
     private readonly states: OnboardingStateRepository,
   ) {}
 
-  async execute(command: SaveStepCommand): Promise<OnboardingState> {
-    const state = await this.states.findByUserAndRole(
+  async execute(command: SaveStepCommand): Promise<OnboardingProgressSnapshot> {
+    return this.states.saveStep(
       command.userId,
       command.role,
+      command.step,
+      command.stepData,
     );
-    if (!state) {
-      throw new OnboardingNotFoundException();
-    }
-    state.saveStep(command.step, command.stepData);
-    return this.states.save(state);
   }
 }
