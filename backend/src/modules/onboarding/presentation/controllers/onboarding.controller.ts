@@ -98,10 +98,21 @@ export class OnboardingController {
       (s) => s.status === 'COMPLETED' || s.status === 'SKIPPED',
     ).length;
     const pct = Math.round((done / allSteps.length) * 100);
+    const nextStep = await this.prisma.onboardingStep.findFirst({
+      where: {
+        flowId: flow.id,
+        stepOrder: { gt: step.stepOrder },
+        stepProgress: {
+          some: { userOnboardingProgressId: progress.id, status: 'PENDING' },
+        },
+      },
+      orderBy: { stepOrder: 'asc' },
+    });
     await this.prisma.userOnboardingProgress.update({
       where: { id: progress.id },
       data: {
         completionPercentage: pct,
+        currentStepId: nextStep?.id ?? null,
         status: pct === 100 ? 'COMPLETED' : 'IN_PROGRESS',
         lastActivityAt: new Date(),
       },

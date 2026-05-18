@@ -23,26 +23,18 @@ export class StartOnboardingHandler implements ICommandHandler<StartOnboardingCo
           flowId: flow.id,
           status: 'NOT_STARTED',
           completionPercentage: 0,
-          currentStepId: flow.steps.sort((a, b) => a.stepOrder - b.stepOrder)[0]?.id ?? null,
+          currentStepId: [...flow.steps].sort((a, b) => a.stepOrder - b.stepOrder)[0]?.id ?? null,
         },
       });
 
-      for (const step of flow.steps) {
-        await this.prisma.userOnboardingStepProgress.upsert({
-          where: {
-            userOnboardingProgressId_stepId: {
-              userOnboardingProgressId: progress.id,
-              stepId: step.id,
-            },
-          },
-          update: {},
-          create: {
-            userOnboardingProgressId: progress.id,
-            stepId: step.id,
-            status: 'PENDING',
-          },
-        });
-      }
+      await this.prisma.userOnboardingStepProgress.createMany({
+        data: flow.steps.map((step) => ({
+          userOnboardingProgressId: progress.id,
+          stepId: step.id,
+          status: 'PENDING',
+        })),
+        skipDuplicates: true,
+      });
     }
   }
 }
