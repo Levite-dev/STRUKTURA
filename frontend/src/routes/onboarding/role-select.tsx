@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAddRole } from '@/lib/api/users'
 import { requireAuth } from '@/lib/route-guards'
 import { useAuth } from '@/lib/auth-context'
@@ -25,13 +25,14 @@ function RoleSelectPage() {
   const [error, setError] = useState<string | null>(null)
 
   // Redirect if already has roles (and not adding more)
-  if (user && user.roles.length > 0) {
-    const search = new URLSearchParams(window.location.search)
-    if (!search.has('add')) {
-      navigate({ to: '/dashboard' })
-      return null
+  useEffect(() => {
+    if (user && user.roles.length > 0) {
+      const search = new URLSearchParams(window.location.search)
+      if (!search.has('add')) {
+        navigate({ to: '/dashboard' })
+      }
     }
-  }
+  }, [user, navigate])
 
   const toggle = (role: BackendRole) =>
     setSelected((prev) =>
