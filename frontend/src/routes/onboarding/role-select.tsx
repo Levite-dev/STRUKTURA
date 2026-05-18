@@ -8,9 +8,9 @@ import {
   ConstructionIcon,
 } from "@hugeicons/core-free-icons"
 import { cn } from "@/lib/utils"
-import { type FrontendRole, type BackendRole } from "@/lib/auth-context"
+import { type BackendRole } from "@/lib/auth-context"
 
-type OnboardingRole = FrontendRole
+type OnboardingRole = "buyer" | "seller"
 
 type RoleOption = {
   id: OnboardingRole

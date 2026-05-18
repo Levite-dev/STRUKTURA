@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Link, useNavigate, useSearch } from "@tanstack/react-router"
+import { Link, useNavigate } from "@tanstack/react-router"
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
   Mail01Icon,

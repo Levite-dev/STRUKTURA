@@ -14,6 +14,9 @@ function AuthCallback() {
   useEffect(() => {
     supabase.auth.exchangeCodeForSession(window.location.search).then(() => {
       // Auth state change listener in AuthProvider will update user
+    }).catch((err) => {
+      console.error('Auth callback failed:', err);
+      navigate({ to: '/auth/login' });
     })
   }, [])
 

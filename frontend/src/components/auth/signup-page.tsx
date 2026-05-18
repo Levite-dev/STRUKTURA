@@ -3,7 +3,6 @@ import { Link, useNavigate } from "@tanstack/react-router"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { motion } from "motion/react"
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
   Mail01Icon,
@@ -12,10 +11,7 @@ import {
   ArrowRight01Icon,
   ViewIcon,
   ViewOffSlashIcon,
-  ShoppingBag03Icon,
-  Store02Icon,
 } from "@hugeicons/core-free-icons"
-import { cn } from "@/lib/utils"
 import { useAuth } from "@/lib/auth-context"
 import { AuthShell } from "./auth-shell"
 
@@ -28,32 +24,9 @@ const schema = z.object({
 })
 type FormValues = z.infer<typeof schema>
 
-export type SignupRole = "buyer" | "seller"
-
-const roles: {
-  id: SignupRole
-  label: string
-  tagline: string
-  icon: typeof ShoppingBag03Icon
-}[] = [
-  {
-    id: "buyer",
-    label: "Buyer",
-    tagline: "Shop construction materials",
-    icon: ShoppingBag03Icon,
-  },
-  {
-    id: "seller",
-    label: "Hardware Seller",
-    tagline: "List and manage products",
-    icon: Store02Icon,
-  },
-]
-
-export function SignupPage({ initialRole = "buyer" }: { initialRole?: SignupRole }) {
+export function SignupPage() {
   const navigate = useNavigate()
   const { signUp } = useAuth()
-  const [role, setRole] = useState<SignupRole>(initialRole)
   const [showPw, setShowPw] = useState(false)
   const [agree, setAgree] = useState(false)
   const [serverError, setServerError] = useState("")
@@ -79,7 +52,7 @@ export function SignupPage({ initialRole = "buyer" }: { initialRole?: SignupRole
   return (
     <AuthShell
       title="Create your account."
-      subtitle="Choose whether you are buying construction materials or selling through the marketplace."
+      subtitle="Sign up to access the STRUKTURA marketplace."
       bottomPrompt={
         <>
           Already have an account?{" "}
@@ -93,53 +66,6 @@ export function SignupPage({ initialRole = "buyer" }: { initialRole?: SignupRole
       }
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Role selector */}
-        <div>
-          <p className="text-sm font-semibold text-brand-black">
-            I&rsquo;m signing up as a…
-          </p>
-          <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {roles.map((r) => {
-              const isActive = role === r.id
-              return (
-                <button
-                  key={r.id}
-                  type="button"
-                  onClick={() => setRole(r.id)}
-                  className={cn(
-                    "relative flex flex-col items-center gap-1.5 rounded-md border px-3 py-4 text-center transition-colors",
-                    isActive
-                      ? "border-brand-orange bg-brand-orange/5"
-                      : "border-brand-black/15 bg-white hover:border-brand-orange/40",
-                  )}
-                >
-                  {isActive && (
-                    <motion.span
-                      layoutId="role-pill"
-                      className="absolute inset-0 -z-10 rounded-md bg-brand-orange/[0.06]"
-                      transition={{ type: "spring", stiffness: 320, damping: 30 }}
-                    />
-                  )}
-                  <span
-                    className={cn(
-                      "flex size-9 items-center justify-center rounded-full",
-                      isActive
-                        ? "bg-brand-orange text-white"
-                        : "bg-brand-orange/10 text-brand-orange",
-                    )}
-                  >
-                    <HugeiconsIcon icon={r.icon} className="size-4" />
-                  </span>
-                  <span className="text-sm font-bold text-brand-black">{r.label}</span>
-                  <span className="text-[10px] leading-tight text-brand-black/65">
-                    {r.tagline}
-                  </span>
-                </button>
-              )
-            })}
-          </div>
-        </div>
-
         {/* First name */}
         <Field label="First name">
           <InputWithIcon

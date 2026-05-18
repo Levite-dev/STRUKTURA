@@ -19,18 +19,6 @@ export type BackendRole =
   | 'MODERATOR'
   | 'SUPPORT'
 
-// Legacy FrontendRole aliases kept so role-select and other pages don't break
-export type FrontendRole = 'buyer' | 'seller'
-
-export const FRONTEND_TO_BACKEND: Record<FrontendRole, BackendRole> = {
-  buyer: 'CLIENT',
-  seller: 'SUPPLIER',
-}
-
-export const BACKEND_TO_FRONTEND: Partial<Record<BackendRole, FrontendRole>> = {
-  CLIENT: 'buyer',
-  SUPPLIER: 'seller',
-}
 
 export type AppUser = {
   id: string
