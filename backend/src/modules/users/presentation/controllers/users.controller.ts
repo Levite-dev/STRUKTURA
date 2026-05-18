@@ -9,7 +9,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { Role } from '@prisma/client';
 
 import {
   CurrentUser,
@@ -17,11 +16,13 @@ import {
 } from '../../../../shared/presentation/decorators';
 import { SupabaseJwtGuard } from '../../../auth/presentation/guards/supabase-jwt.guard';
 import { EmailVerifiedGuard } from '../../../auth/presentation/guards/email-verified.guard';
-import { PrismaService } from '../../../../shared/infrastructure/prisma/prisma.service';
 import { GetUserByIdQuery } from '../../application/queries/get-user-by-id/get-user-by-id.query';
 import { User } from '../../domain/entities/user.entity';
 import { UserResponseDto } from '../http/response-dtos/user.response-dto';
 import { AddRoleCommand } from '../../application/commands/add-role/add-role.command';
+import { SetPrimaryRoleCommand } from '../../application/commands/set-primary-role/set-primary-role.command';
+import { AddRoleRequestDto } from '../http/request-dtos/add-role.request-dto';
+import { SetPrimaryRoleRequestDto } from '../http/request-dtos/set-primary-role.request-dto';
 import { NotFoundException } from '../../../../shared/domain/exceptions';
 
 @Controller('users')
@@ -29,10 +30,10 @@ export class UsersController {
   constructor(
     private readonly queryBus: QueryBus,
     private readonly commandBus: CommandBus,
-    private readonly prisma: PrismaService,
   ) {}
 
   @Get('me')
+  @UseGuards(SupabaseJwtGuard, EmailVerifiedGuard)
   async me(@CurrentUser() user: AuthenticatedUser): Promise<UserResponseDto> {
     const fullUser = await this.queryBus.execute<GetUserByIdQuery, User | null>(
       new GetUserByIdQuery(user.id),
@@ -48,7 +49,7 @@ export class UsersController {
   @UseGuards(SupabaseJwtGuard, EmailVerifiedGuard)
   async addRole(
     @CurrentUser() user: AuthenticatedUser,
-    @Body() body: { role: Role },
+    @Body() body: AddRoleRequestDto,
   ): Promise<void> {
     await this.commandBus.execute(new AddRoleCommand(user.id, body.role));
   }
@@ -57,11 +58,8 @@ export class UsersController {
   @UseGuards(SupabaseJwtGuard, EmailVerifiedGuard)
   async setPrimaryRole(
     @CurrentUser() user: AuthenticatedUser,
-    @Body() body: { role: Role },
+    @Body() body: SetPrimaryRoleRequestDto,
   ): Promise<void> {
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: { primaryRole: body.role },
-    });
+    await this.commandBus.execute(new SetPrimaryRoleCommand(user.id, body.role));
   }
 }
