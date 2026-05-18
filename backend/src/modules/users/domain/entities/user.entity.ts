@@ -5,10 +5,12 @@ export interface UserProps {
   supabaseAuthId: string;
   email: string;
   emailVerifiedAt: Date | null;
-  fullName: string | null;
+  firstName: string | null;
+  lastName: string | null;
   phone: string | null;
   avatarUrl: string | null;
   status: UserStatus;
+  primaryRole: Role | null;
   lastLoginAt: Date | null;
   lastLoginIp: string | null;
   roles: Role[];
@@ -39,8 +41,12 @@ export class User {
     return this.props.emailVerifiedAt;
   }
 
-  get fullName(): string | null {
-    return this.props.fullName;
+  get firstName(): string | null {
+    return this.props.firstName;
+  }
+
+  get lastName(): string | null {
+    return this.props.lastName;
   }
 
   get phone(): string | null {
@@ -53,6 +59,10 @@ export class User {
 
   get status(): UserStatus {
     return this.props.status;
+  }
+
+  get primaryRole(): Role | null {
+    return this.props.primaryRole;
   }
 
   get roles(): Role[] {

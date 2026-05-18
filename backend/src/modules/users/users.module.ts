@@ -7,6 +7,7 @@ import { USER_REPOSITORY } from './domain/repositories/user.repository';
 
 import { SyncSupabaseUserHandler } from './application/commands/sync-supabase-user/sync-supabase-user.handler';
 import { AssignRoleHandler } from './application/commands/assign-role/assign-role.handler';
+import { AddRoleHandler } from './application/commands/add-role/add-role.handler';
 import { RecordLoginHandler } from './application/commands/record-login/record-login.handler';
 import { MarkEmailVerifiedHandler } from './application/commands/mark-email-verified/mark-email-verified.handler';
 import { GetUserByIdHandler } from './application/queries/get-user-by-id/get-user-by-id.handler';
@@ -15,6 +16,7 @@ import { GetUserBySupabaseIdHandler } from './application/queries/get-user-by-su
 const CommandHandlers = [
   SyncSupabaseUserHandler,
   AssignRoleHandler,
+  AddRoleHandler,
   RecordLoginHandler,
   MarkEmailVerifiedHandler,
 ];

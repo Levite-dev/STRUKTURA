@@ -58,7 +58,9 @@ export class AuthController {
       new SignupCommand(
         dto.email,
         dto.password,
-        dto.fullName ?? null,
+        dto.firstName,
+        dto.lastName,
+        dto.phone,
         getIp(req),
         getUserAgent(req),
       ),

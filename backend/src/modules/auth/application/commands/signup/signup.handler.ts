@@ -44,7 +44,9 @@ export class SignupHandler implements ICommandHandler<
       new SyncSupabaseUserCommand(
         supabaseUser.supabaseAuthId,
         supabaseUser.email,
-        command.fullName,
+        command.firstName,
+        command.lastName,
+        command.phone,
         supabaseUser.emailConfirmedAt,
       ),
     );
@@ -54,8 +56,8 @@ export class SignupHandler implements ICommandHandler<
       new UserSignedUpEvent(
         user.id,
         user.email,
-        command.ipAddress,
-        command.userAgent,
+        command.ipAddress ?? null,
+        command.userAgent ?? null,
       ),
     );
 
