@@ -22,11 +22,6 @@ export class AddRoleHandler implements ICommandHandler<AddRoleCommand> {
       data: { primaryRole: role },
     });
 
-    // TODO(Phase 3): StartOnboardingCommand will be updated to accept Role[]
-    try {
-      await this.commandBus.execute(new StartOnboardingCommand(userId, role));
-    } catch {
-      // Phase 3 will fix the onboarding handler to accept Role[]
-    }
+    await this.commandBus.execute(new StartOnboardingCommand(userId, [role]));
   }
 }

@@ -4,7 +4,7 @@ export class SaveStepCommand {
   constructor(
     public readonly userId: string,
     public readonly role: Role,
-    public readonly step: string,
-    public readonly stepData: Record<string, unknown>,
+    public readonly stepCode: string,
+    public readonly data: unknown,
   ) {}
 }

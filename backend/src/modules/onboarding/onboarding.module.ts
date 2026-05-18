@@ -21,6 +21,22 @@ import { RejectOnboardingHandler } from './application/commands/reject-onboardin
 import { GetOnboardingStateHandler } from './application/queries/get-onboarding-state/get-onboarding-state.handler';
 import { ListPendingOnboardingHandler } from './application/queries/list-pending-onboarding/list-pending-onboarding.handler';
 
+import { StepHandlerRegistry } from './application/commands/save-step/step-handler.registry';
+import { StepHandlerBootstrapService } from './application/commands/save-step/step-handler-bootstrap.service';
+import { ClientAddressHandler } from './application/commands/save-step/handlers/client-address.handler';
+import { ClientPreferencesHandler } from './application/commands/save-step/handlers/client-preferences.handler';
+import { ContractorBusinessBasicsHandler } from './application/commands/save-step/handlers/contractor-business-basics.handler';
+import { ContractorServiceHandler } from './application/commands/save-step/handlers/contractor-service.handler';
+import { PortfolioItemHandler } from './application/commands/save-step/handlers/portfolio-item.handler';
+import { DocumentUploadHandler } from './application/commands/save-step/handlers/document-upload.handler';
+import { PayoutAccountHandler } from './application/commands/save-step/handlers/payout-account.handler';
+import { QuotationTemplateHandler } from './application/commands/save-step/handlers/quotation-template.handler';
+import { SupplierProfilePatchHandler } from './application/commands/save-step/handlers/supplier-profile-patch.handler';
+import { ProductHandler } from './application/commands/save-step/handlers/product.handler';
+import { DeliverySettingHandler } from './application/commands/save-step/handlers/delivery-setting.handler';
+import { JobSeekerProfilePatchHandler } from './application/commands/save-step/handlers/job-seeker-profile-patch.handler';
+import { CoverImageHandler } from './application/commands/save-step/handlers/cover-image.handler';
+
 const CommandHandlers = [
   StartOnboardingHandler,
   SaveStepHandler,
@@ -30,6 +46,22 @@ const CommandHandlers = [
 ];
 
 const QueryHandlers = [GetOnboardingStateHandler, ListPendingOnboardingHandler];
+
+const StepHandlers = [
+  ClientAddressHandler,
+  ClientPreferencesHandler,
+  ContractorBusinessBasicsHandler,
+  ContractorServiceHandler,
+  PortfolioItemHandler,
+  DocumentUploadHandler,
+  PayoutAccountHandler,
+  QuotationTemplateHandler,
+  SupplierProfilePatchHandler,
+  ProductHandler,
+  DeliverySettingHandler,
+  JobSeekerProfilePatchHandler,
+  CoverImageHandler,
+];
 
 @Module({
   imports: [CqrsModule, UsersModule, AuthModule],
@@ -43,6 +75,9 @@ const QueryHandlers = [GetOnboardingStateHandler, ListPendingOnboardingHandler];
     ProfilePrismaRepository,
     { provide: PROFILE_REPOSITORY, useExisting: ProfilePrismaRepository },
     PublicRoleParamPipe,
+    StepHandlerRegistry,
+    StepHandlerBootstrapService,
+    ...StepHandlers,
     ...CommandHandlers,
     ...QueryHandlers,
   ],
