@@ -4,7 +4,40 @@ import { AnimatePresence, motion } from "motion/react"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons"
 import { cn } from "@/lib/utils"
-import { useAuth, type BackendRole, type OnboardingState } from "@/lib/auth-context"
+import { type BackendRole } from "@/lib/auth-context"
+
+// TODO(Phase 6): replace with real OnboardingState from React Query hooks
+type OnboardingState = {
+  id: string
+  userId: string
+  role: BackendRole
+  flow: { id: string; code: string; name: string; description: string | null }
+  status: string
+  currentStep: string | null
+  completionPercentage: number
+  data: Record<string, Record<string, unknown>>
+  steps: Array<{
+    id: string
+    stepCode: string
+    title: string
+    description: string | null
+    stepOrder: number
+    isRequired: boolean
+    isSkippable: boolean
+    estimatedMinutes: number | null
+    status: string
+    metadataJson: Record<string, unknown>
+    completedAt: string | null
+    skippedAt: string | null
+    blockedReason: string | null
+  }>
+  missingSteps: string[]
+  startedAt: string | null
+  completedAt: string | null
+  skippedAt: string | null
+  rejectedAt: string | null
+  rejectReason: string | null
+}
 import { OnboardingLayout } from "@/components/onboarding/onboarding-layout"
 import { OnboardingComplete } from "@/components/onboarding/onboarding-complete"
 
@@ -80,14 +113,30 @@ export const Route = createFileRoute("/onboarding/$role")({
   component: OnboardingWizard,
 })
 
+// TODO(Phase 6): wire up real API calls via React Query hooks
+async function stubGetOnboardingState(_role: BackendRole): Promise<OnboardingState | null> {
+  return null
+}
+async function stubStartOnboarding(_role: BackendRole): Promise<OnboardingState> {
+  throw new Error("Onboarding API not yet wired (Phase 6).")
+}
+async function stubSaveOnboardingStep(
+  _role: BackendRole,
+  _step: string,
+  _data: Record<string, unknown>,
+): Promise<OnboardingState> {
+  throw new Error("Onboarding API not yet wired (Phase 6).")
+}
+async function stubSubmitOnboarding(_role: BackendRole): Promise<OnboardingState> {
+  throw new Error("Onboarding API not yet wired (Phase 6).")
+}
+
 function OnboardingWizard() {
   const { role } = Route.useParams()
-  const {
-    getOnboardingState,
-    startOnboarding,
-    saveOnboardingStep,
-    submitOnboarding,
-  } = useAuth()
+  const getOnboardingState = stubGetOnboardingState
+  const startOnboarding = stubStartOnboarding
+  const saveOnboardingStep = stubSaveOnboardingStep
+  const submitOnboarding = stubSubmitOnboarding
   const [currentState, setCurrentState] = useState<OnboardingState | null>(null)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")

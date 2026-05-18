@@ -8,7 +8,7 @@ import {
   ConstructionIcon,
 } from "@hugeicons/core-free-icons"
 import { cn } from "@/lib/utils"
-import { useAuth, type FrontendRole, type BackendRole } from "@/lib/auth-context"
+import { type FrontendRole, type BackendRole } from "@/lib/auth-context"
 
 type OnboardingRole = FrontendRole
 
@@ -43,19 +43,13 @@ export const Route = createFileRoute("/onboarding/role-select")({
 
 function RoleSelectPage() {
   const navigate = useNavigate()
-  const { startOnboarding } = useAuth()
   const [selected, setSelected] = useState<BackendRole | null>(null)
   const [loading, setLoading] = useState(false)
 
-  const handleSelect = async (role: RoleOption) => {
+  const handleSelect = (role: RoleOption) => {
     setSelected(role.backendRole)
     setLoading(true)
-    try {
-      await startOnboarding(role.backendRole)
-      navigate({ to: "/onboarding/$role", params: { role: role.backendRole } })
-    } catch {
-      setLoading(false)
-    }
+    navigate({ to: "/onboarding/$role", params: { role: role.backendRole } })
   }
 
   return (

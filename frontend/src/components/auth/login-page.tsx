@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Link, useNavigate } from "@tanstack/react-router"
+import { Link, useNavigate, useSearch } from "@tanstack/react-router"
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
   Mail01Icon,
@@ -13,7 +13,7 @@ import { AuthShell } from "./auth-shell"
 
 export function LoginPage() {
   const navigate = useNavigate()
-  const { signIn, onboardingStates } = useAuth()
+  const { signIn } = useAuth()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPw, setShowPw] = useState(false)
@@ -26,16 +26,9 @@ export function LoginPage() {
     setLoading(true)
     try {
       await signIn(email, password)
-      const inProgress = onboardingStates.find(
-        (s) => s.status === "IN_PROGRESS" || s.status === "NOT_STARTED",
-      )
-      if (inProgress) {
-        navigate({ to: "/onboarding/$role", params: { role: inProgress.role } })
-      } else if (onboardingStates.length === 0) {
-        navigate({ to: "/onboarding/role-select" })
-      } else {
-        navigate({ to: "/dashboard" })
-      }
+      // After sign-in, auth state change will load the user.
+      // Navigate to dashboard; the callback or route guards handle onboarding redirect.
+      navigate({ to: "/dashboard" })
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong")
     } finally {
@@ -60,9 +53,7 @@ export function LoginPage() {
       }
     >
       <form onSubmit={handleSubmit} className="space-y-5">
-        {error && (
-          <p className="text-sm text-destructive">{error}</p>
-        )}
+        {error && <p className="text-sm text-destructive">{error}</p>}
 
         <Field label="Email">
           <InputWithIcon
@@ -100,7 +91,9 @@ export function LoginPage() {
           disabled={loading}
           className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-orange py-3.5 text-sm font-semibold text-white transition-colors hover:bg-brand-orange-soft disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {loading && <span className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />}
+          {loading && (
+            <span className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+          )}
           Sign in
           <HugeiconsIcon icon={ArrowRight01Icon} className="size-3.5" />
         </button>
@@ -121,9 +114,7 @@ function Field({
   return (
     <div>
       <div className="flex items-baseline justify-between">
-        <label className="text-sm font-semibold text-brand-black">
-          {label}
-        </label>
+        <label className="text-sm font-semibold text-brand-black">{label}</label>
         {right}
       </div>
       <div className="mt-2">{children}</div>
@@ -180,10 +171,7 @@ function PasswordField({
         aria-label={show ? "Hide password" : "Show password"}
         className="absolute top-1/2 right-3 -translate-y-1/2 text-brand-black/45 transition-colors hover:text-brand-orange"
       >
-        <HugeiconsIcon
-          icon={show ? ViewOffSlashIcon : ViewIcon}
-          className="size-4"
-        />
+        <HugeiconsIcon icon={show ? ViewOffSlashIcon : ViewIcon} className="size-4" />
       </button>
     </div>
   )
