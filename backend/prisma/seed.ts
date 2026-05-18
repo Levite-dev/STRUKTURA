@@ -52,7 +52,7 @@ const steps: Record<string, Array<{
     { stepCode: 'supplier.delivery', title: 'Delivery Settings', phase: 3, triggerType: 'PERSISTENT_CARD', fieldGroupCode: 'supplier.delivery', stepOrder: 9, isRequired: true, isSkippable: false },
     { stepCode: 'supplier.verification', title: 'Business Permit', phase: 3, triggerType: 'PERSISTENT_CARD', fieldGroupCode: '*.verification', stepOrder: 10, isRequired: true, isSkippable: false },
     { stepCode: 'supplier.tax', title: 'Tax Documents', phase: 3, triggerType: 'PERSISTENT_CARD', fieldGroupCode: '*.tax', stepOrder: 11, isRequired: false, isSkippable: true },
-    { stepCode: 'supplier.payout', title: 'Payout Account', phase: 3, triggerType: 'PERSISTENT_CARD', fieldGroupCode: 'contractor.payout', stepOrder: 12, isRequired: true, isSkippable: false },
+    { stepCode: 'supplier.payout', title: 'Payout Account', phase: 3, triggerType: 'PERSISTENT_CARD', fieldGroupCode: 'supplier.payout', stepOrder: 12, isRequired: true, isSkippable: false },
     { stepCode: 'supplier.cover', title: 'Store Photo', phase: 4, triggerType: 'PERSISTENT_CARD', fieldGroupCode: '*.cover', stepOrder: 13, isRequired: false, isSkippable: true },
   ],
   job_seeker_onboarding: [
@@ -98,4 +98,6 @@ async function main() {
   console.log('Seed complete: 4 flows, 42 steps');
 }
 
-main().catch(console.error).finally(() => prisma.$disconnect());
+main()
+  .catch((e) => { console.error(e); process.exit(1); })
+  .finally(() => prisma.$disconnect());
