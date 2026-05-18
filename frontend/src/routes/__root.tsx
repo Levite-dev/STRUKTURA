@@ -9,6 +9,7 @@ import { TanStackRouterDevtools } from "@tanstack/react-router-devtools"
 import { CartProvider } from "@/components/cart/cart-context"
 import { RoleProvider } from "@/components/dashboard/role-context"
 import { ErrorBoundary } from "@/components/shared/error-boundary"
+import { ActionGateProvider } from "@/components/onboarding/action-gate-provider"
 
 function PageLoader() {
   return (
@@ -49,17 +50,19 @@ function RootLayout() {
   return (
     <RoleProvider>
       <CartProvider>
-        <a href="#main-content" className="skip-link">
-          Skip to main content
-        </a>
-        <ErrorBoundary>
-          <Suspense fallback={<PageLoader />}>
-            <div className="relative min-h-screen bg-gray-100" id="main-content">
-              <Outlet />
-            </div>
-          </Suspense>
-        </ErrorBoundary>
-        {import.meta.env.DEV && <TanStackRouterDevtools position="bottom-right" />}
+        <ActionGateProvider>
+          <a href="#main-content" className="skip-link">
+            Skip to main content
+          </a>
+          <ErrorBoundary>
+            <Suspense fallback={<PageLoader />}>
+              <div className="relative min-h-screen bg-gray-100" id="main-content">
+                <Outlet />
+              </div>
+            </Suspense>
+          </ErrorBoundary>
+          {import.meta.env.DEV && <TanStackRouterDevtools position="bottom-right" />}
+        </ActionGateProvider>
       </CartProvider>
     </RoleProvider>
   )

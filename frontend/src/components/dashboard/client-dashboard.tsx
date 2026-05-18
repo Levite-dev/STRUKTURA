@@ -16,6 +16,8 @@ import { SidebarNav } from "./sidebar-nav"
 import { StatTile } from "./stat-tile"
 import { DataTable } from "./data-table"
 import { sampleOrders } from "./dashboard-data"
+import { OnboardingBanner } from "./onboarding-banner"
+import { DiscoveryCard } from "./discovery-card"
 import { projects } from "@/components/projects/projects-data"
 import { jobs } from "@/components/jobs/jobs-data"
 import { estimates } from "@/components/estimate/estimates-data"
@@ -29,6 +31,11 @@ export function ClientDashboard() {
       <Header />
       <DashboardShell sidebar={<SidebarNav role="client" />}>
         <div>
+          <OnboardingBanner />
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 px-0">
+            <DiscoveryCard targetRole="CONTRACTOR" />
+            <DiscoveryCard targetRole="SUPPLIER" />
+          </div>
           <DashboardHeader
             title="Welcome back, Juan"
             subtitle="Track orders, projects, and active estimates."

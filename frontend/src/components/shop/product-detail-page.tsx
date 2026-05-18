@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { Link, useNavigate } from "@tanstack/react-router"
+import { useActionGate } from "@/components/onboarding/action-gate-provider"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { ArrowRight01Icon, StarIcon } from "@hugeicons/core-free-icons"
 
@@ -58,10 +59,15 @@ export function ProductDetailPage({ product }: { product: Product }) {
   const [activeImg, setActiveImg] = useState(0)
   const cart = useCart()
   const navigate = useNavigate()
+  const { require } = useActionGate()
   const bullets = bulletByCategory[product.category] ?? bulletByCategory.default
 
   const onAdd = () => cart.add(product.id, 1)
-  const onBuy = () => {
+  const onBuy = async () => {
+    let result = await require({ role: 'CLIENT', phase: 2, reason: 'Complete your client profile to purchase' })
+    if (result === 'cancelled') return
+    result = await require({ role: 'CLIENT', phase: 3, reason: 'Add a delivery address to continue' })
+    if (result === 'cancelled') return
     cart.add(product.id, 1)
     navigate({ to: "/checkout" })
   }
