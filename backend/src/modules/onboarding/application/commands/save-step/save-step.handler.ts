@@ -1,5 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { PrismaService } from '../../../../shared/infrastructure/prisma/prisma.service';
+import { PrismaService } from '../../../../../shared/infrastructure/prisma/prisma.service';
 import { SaveStepCommand } from './save-step.command';
 import { StepHandlerRegistry } from './step-handler.registry';
 
@@ -10,7 +10,12 @@ export class SaveStepHandler implements ICommandHandler<SaveStepCommand> {
     private readonly registry: StepHandlerRegistry,
   ) {}
 
-  async execute({ userId, role, stepCode, data }: SaveStepCommand): Promise<void> {
+  async execute({
+    userId,
+    role,
+    stepCode,
+    data,
+  }: SaveStepCommand): Promise<void> {
     const flowCode = `${(role as string).toLowerCase()}_onboarding`;
     const flow = await this.prisma.onboardingFlow.findFirstOrThrow({
       where: { code: flowCode },

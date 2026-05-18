@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../../../../shared/infrastructure/prisma/prisma.service';
+import { PrismaService } from '../../../../../../shared/infrastructure/prisma/prisma.service';
 import { StepHandler } from '../step-handler.registry';
 import { z } from 'zod';
 
@@ -20,7 +20,12 @@ const schema = z.object({
 export class ProductHandler implements StepHandler {
   constructor(private readonly prisma: PrismaService) {}
 
-  async handle(userId: string, _progressId: string, _stepId: string, data: unknown): Promise<void> {
+  async handle(
+    userId: string,
+    _progressId: string,
+    _stepId: string,
+    data: unknown,
+  ): Promise<void> {
     const parsed = schema.parse(data);
     const profile = await this.prisma.supplierProfile.upsert({
       where: { userId },
@@ -28,7 +33,11 @@ export class ProductHandler implements StepHandler {
       create: { userId, businessName: 'My Store' },
     });
     await this.prisma.product.create({
-      data: { supplierProfileId: profile.id, ...parsed, price: parsed.price.toString() },
+      data: {
+        supplierProfileId: profile.id,
+        ...parsed,
+        price: parsed.price.toString(),
+      },
     });
   }
 }

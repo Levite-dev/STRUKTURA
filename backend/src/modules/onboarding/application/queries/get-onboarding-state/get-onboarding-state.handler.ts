@@ -1,5 +1,5 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { PrismaService } from '../../../../shared/infrastructure/prisma/prisma.service';
+import { PrismaService } from '../../../../../shared/infrastructure/prisma/prisma.service';
 import { GetOnboardingStateQuery } from './get-onboarding-state.query';
 
 @QueryHandler(GetOnboardingStateQuery)
@@ -23,7 +23,9 @@ export class GetOnboardingStateHandler implements IQueryHandler<GetOnboardingSta
 
     const roles = user.onboardingProgress.map((prog) => {
       const phases = [1, 2, 3, 4].map((phase) => {
-        const phaseSteps = prog.stepProgress.filter((sp) => sp.step.phase === phase);
+        const phaseSteps = prog.stepProgress.filter(
+          (sp) => sp.step.phase === phase,
+        );
         return {
           phase,
           status:

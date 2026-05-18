@@ -21,14 +21,13 @@ import {
 import { PrismaService } from '../../../../shared/infrastructure/prisma/prisma.service';
 
 import { PublicRoleParamPipe } from '../pipes/role-param.pipe';
-import { SaveStepRequestDto } from '../http/request-dtos/save-step.request-dto';
-import { OnboardingStateResponseDto } from '../http/response-dtos/onboarding-state.response-dto';
 
 import { StartOnboardingCommand } from '../../application/commands/start-onboarding/start-onboarding.command';
 import { SaveStepCommand } from '../../application/commands/save-step/save-step.command';
 import { SubmitOnboardingCommand } from '../../application/commands/submit-onboarding/submit-onboarding.command';
 import { GetOnboardingStateQuery } from '../../application/queries/get-onboarding-state/get-onboarding-state.query';
 import { OnboardingNotFoundException } from '../../domain/exceptions/onboarding.exceptions';
+import type { OnboardingProgressSnapshot } from '../../domain/repositories/onboarding-state.repository';
 
 @UseGuards(SupabaseJwtGuard, EmailVerifiedGuard)
 @Controller('onboarding')
@@ -51,11 +50,15 @@ export class OnboardingController {
   @Get('state')
   async getState(
     @CurrentUser() user: AuthenticatedUser,
-  ) {
-    const state = await this.queryBus.execute(new GetOnboardingStateQuery(user.id));
+  ): Promise<OnboardingProgressSnapshot> {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const state = await this.queryBus.execute(
+      new GetOnboardingStateQuery(user.id),
+    );
     if (!state) {
       throw new OnboardingNotFoundException();
     }
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return state;
   }
 

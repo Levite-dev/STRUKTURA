@@ -50,7 +50,9 @@ export class OAuthSyncHandler implements ICommandHandler<
     if (!user) {
       const oauthFullName =
         (claims.userMetadata?.['full_name'] as string) ?? null;
-      const [oauthFirst, ...rest] = oauthFullName ? oauthFullName.split(' ') : [];
+      const [oauthFirst, ...rest] = oauthFullName
+        ? oauthFullName.split(' ')
+        : [];
       const oauthLast = rest.length > 0 ? rest.join(' ') : null;
       user = await this.commandBus.execute<SyncSupabaseUserCommand, User>(
         new SyncSupabaseUserCommand(

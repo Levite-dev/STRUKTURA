@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../../../../shared/infrastructure/prisma/prisma.service';
+import { PrismaService } from '../../../../../../shared/infrastructure/prisma/prisma.service';
 import { StepHandler } from '../step-handler.registry';
 import { z } from 'zod';
 
@@ -14,7 +14,12 @@ const schema = z.object({
 export class ContractorBusinessBasicsHandler implements StepHandler {
   constructor(private readonly prisma: PrismaService) {}
 
-  async handle(userId: string, _progressId: string, _stepId: string, data: unknown): Promise<void> {
+  async handle(
+    userId: string,
+    _progressId: string,
+    _stepId: string,
+    data: unknown,
+  ): Promise<void> {
     const parsed = schema.parse(data);
     await this.prisma.contractorProfile.upsert({
       where: { userId },

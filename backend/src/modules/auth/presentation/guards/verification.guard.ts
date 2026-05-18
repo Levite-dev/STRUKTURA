@@ -1,4 +1,9 @@
-import { CanActivate, ExecutionContext, Injectable, ForbiddenException } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  ForbiddenException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { VerificationGateService } from '../../../onboarding/domain/services/verification-gate.service';
 import type { GatedAction } from '../../../onboarding/domain/services/verification-gate.service';
@@ -21,10 +26,13 @@ export class VerificationGuard implements CanActivate {
   ) {}
 
   async canActivate(ctx: ExecutionContext): Promise<boolean> {
-    const action = this.reflector.get<GatedAction>(VERIFICATION_KEY, ctx.getHandler());
+    const action = this.reflector.get<GatedAction>(
+      VERIFICATION_KEY,
+      ctx.getHandler(),
+    );
     if (!action) return true;
 
-    const req = ctx.switchToHttp().getRequest();
+    const req = ctx.switchToHttp().getRequest<{ user?: { id: string } }>();
     const userId = req.user?.id;
     if (!userId) throw new ForbiddenException('Not authenticated');
 

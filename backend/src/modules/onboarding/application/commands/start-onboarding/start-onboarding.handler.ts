@@ -1,5 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { PrismaService } from '../../../../shared/infrastructure/prisma/prisma.service';
+import { PrismaService } from '../../../../../shared/infrastructure/prisma/prisma.service';
 import { StartOnboardingCommand } from './start-onboarding.command';
 
 @CommandHandler(StartOnboardingCommand)
@@ -23,7 +23,9 @@ export class StartOnboardingHandler implements ICommandHandler<StartOnboardingCo
           flowId: flow.id,
           status: 'NOT_STARTED',
           completionPercentage: 0,
-          currentStepId: [...flow.steps].sort((a, b) => a.stepOrder - b.stepOrder)[0]?.id ?? null,
+          currentStepId:
+            [...flow.steps].sort((a, b) => a.stepOrder - b.stepOrder)[0]?.id ??
+            null,
         },
       });
 
