@@ -23,6 +23,8 @@ import { ListPendingOnboardingHandler } from './application/queries/list-pending
 
 import { StepHandlerRegistry } from './application/commands/save-step/step-handler.registry';
 import { StepHandlerBootstrapService } from './application/commands/save-step/step-handler-bootstrap.service';
+import { VerificationGateService } from './domain/services/verification-gate.service';
+import { VerificationGuard } from '../auth/presentation/guards/verification.guard';
 import { ClientAddressHandler } from './application/commands/save-step/handlers/client-address.handler';
 import { ClientPreferencesHandler } from './application/commands/save-step/handlers/client-preferences.handler';
 import { ContractorBusinessBasicsHandler } from './application/commands/save-step/handlers/contractor-business-basics.handler';
@@ -77,9 +79,12 @@ const StepHandlers = [
     PublicRoleParamPipe,
     StepHandlerRegistry,
     StepHandlerBootstrapService,
+    VerificationGateService,
+    VerificationGuard,
     ...StepHandlers,
     ...CommandHandlers,
     ...QueryHandlers,
   ],
+  exports: [VerificationGateService, VerificationGuard],
 })
 export class OnboardingModule {}
