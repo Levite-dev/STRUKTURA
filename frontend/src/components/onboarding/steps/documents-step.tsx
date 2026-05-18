@@ -12,12 +12,16 @@ type DocumentsData = {
 }
 
 type DocumentsStepProps = {
-  role: "CONTRACTOR" | "SUPPLIER"
+  role: string
   initialData?: DocumentsData
   onSave: (data: DocumentsData) => void
+  onNext?: (data: unknown) => void
+  onSkip?: () => void
+  isSaving?: boolean
+  isSkipping?: boolean
 }
 
-export function DocumentsStep({ role, initialData, onSave }: DocumentsStepProps) {
+export function DocumentsStep({ role, initialData, onSave, onNext, onSkip, isSaving, isSkipping }: DocumentsStepProps) {
   const [licenseUrl, setLicenseUrl] = useState(initialData?.licenseUrl ?? "")
   const [permitUrl, setPermitUrl] = useState(initialData?.permitUrl ?? "")
   const [insuranceUrl, setInsuranceUrl] = useState(
@@ -34,7 +38,12 @@ export function DocumentsStep({ role, initialData, onSave }: DocumentsStepProps)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onSave({ licenseUrl, permitUrl, insuranceUrl })
+    const data = { licenseUrl, permitUrl, insuranceUrl }
+    if (onNext) {
+      void onNext(data)
+    } else {
+      onSave(data)
+    }
   }
 
   const isContractor = role === "CONTRACTOR"
@@ -86,6 +95,26 @@ export function DocumentsStep({ role, initialData, onSave }: DocumentsStepProps)
         Tip: Upload your documents to Google Drive, Dropbox, or any cloud
         storage and paste the shareable link here. Your account will be reviewed
         within 1–2 business days.
+      </div>
+
+      <div className="flex gap-3 pt-2">
+        <button
+          type="submit"
+          disabled={isSaving}
+          className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+        >
+          {isSaving ? 'Saving…' : 'Save & Continue'}
+        </button>
+        {onSkip && (
+          <button
+            type="button"
+            onClick={() => void onSkip()}
+            disabled={isSkipping}
+            className="rounded-lg border px-4 py-2.5 text-sm font-medium disabled:opacity-50"
+          >
+            {isSkipping ? 'Skipping…' : 'Skip'}
+          </button>
+        )}
       </div>
     </form>
   )

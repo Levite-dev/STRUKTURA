@@ -17,11 +17,19 @@ type BusinessInfoData = {
 type BusinessInfoStepProps = {
   initialData?: BusinessInfoData
   onSave: (data: BusinessInfoData) => void
+  onNext?: (data: unknown) => void
+  onSkip?: () => void
+  isSaving?: boolean
+  isSkipping?: boolean
 }
 
 export function BusinessInfoStep({
   initialData,
   onSave,
+  onNext,
+  onSkip,
+  isSaving,
+  isSkipping,
 }: BusinessInfoStepProps) {
   const [businessName, setBusinessName] = useState(
     initialData?.businessName ?? "",
@@ -45,7 +53,12 @@ export function BusinessInfoStep({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onSave({ businessName, businessAddress, businessRegNo, taxId })
+    const data = { businessName, businessAddress, businessRegNo, taxId }
+    if (onNext) {
+      void onNext(data)
+    } else {
+      onSave(data)
+    }
   }
 
   return (
@@ -100,6 +113,26 @@ export function BusinessInfoStep({
           className={inputClass}
         />
       </Field>
+
+      <div className="flex gap-3 pt-2">
+        <button
+          type="submit"
+          disabled={isSaving}
+          className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+        >
+          {isSaving ? 'Saving…' : 'Save & Continue'}
+        </button>
+        {onSkip && (
+          <button
+            type="button"
+            onClick={() => void onSkip()}
+            disabled={isSkipping}
+            className="rounded-lg border px-4 py-2.5 text-sm font-medium disabled:opacity-50"
+          >
+            {isSkipping ? 'Skipping…' : 'Skip'}
+          </button>
+        )}
+      </div>
     </form>
   )
 }

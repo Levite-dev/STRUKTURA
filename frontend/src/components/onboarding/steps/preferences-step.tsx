@@ -20,9 +20,13 @@ type PreferencesData = {
 type PreferencesStepProps = {
   initialData?: PreferencesData
   onSave: (data: PreferencesData) => void
+  onNext?: (data: unknown) => void
+  onSkip?: () => void
+  isSaving?: boolean
+  isSkipping?: boolean
 }
 
-export function PreferencesStep({ initialData, onSave }: PreferencesStepProps) {
+export function PreferencesStep({ initialData, onSave, onNext, onSkip, isSaving, isSkipping }: PreferencesStepProps) {
   const [selected, setSelected] = useState<string[]>(
     initialData?.preferredCategories ?? [],
   )
@@ -41,7 +45,12 @@ export function PreferencesStep({ initialData, onSave }: PreferencesStepProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onSave({ preferredCategories: selected })
+    const data = { preferredCategories: selected }
+    if (onNext) {
+      void onNext(data)
+    } else {
+      onSave(data)
+    }
   }
 
   return (
@@ -81,6 +90,26 @@ export function PreferencesStep({ initialData, onSave }: PreferencesStepProps) {
           Select at least one category to continue.
         </p>
       )}
+
+      <div className="flex gap-3 pt-2">
+        <button
+          type="submit"
+          disabled={isSaving}
+          className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+        >
+          {isSaving ? 'Saving…' : 'Save & Continue'}
+        </button>
+        {onSkip && (
+          <button
+            type="button"
+            onClick={() => void onSkip()}
+            disabled={isSkipping}
+            className="rounded-lg border px-4 py-2.5 text-sm font-medium disabled:opacity-50"
+          >
+            {isSkipping ? 'Skipping…' : 'Skip'}
+          </button>
+        )}
+      </div>
     </form>
   )
 }

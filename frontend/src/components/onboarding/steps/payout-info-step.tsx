@@ -15,9 +15,13 @@ type PayoutInfoData = {
 type PayoutInfoStepProps = {
   initialData?: PayoutInfoData
   onSave: (data: PayoutInfoData) => void
+  onNext?: (data: unknown) => void
+  onSkip?: () => void
+  isSaving?: boolean
+  isSkipping?: boolean
 }
 
-export function PayoutInfoStep({ initialData, onSave }: PayoutInfoStepProps) {
+export function PayoutInfoStep({ initialData, onSave, onNext, onSkip, isSaving, isSkipping }: PayoutInfoStepProps) {
   const [bankName, setBankName] = useState(initialData?.bankName ?? "")
   const [acctName, setAcctName] = useState(initialData?.acctName ?? "")
   const [acctNo, setAcctNo] = useState(initialData?.acctNo ?? "")
@@ -32,7 +36,12 @@ export function PayoutInfoStep({ initialData, onSave }: PayoutInfoStepProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onSave({ bankName, acctName, acctNo })
+    const data = { bankName, acctName, acctNo }
+    if (onNext) {
+      void onNext(data)
+    } else {
+      onSave(data)
+    }
   }
 
   return (
@@ -83,6 +92,26 @@ export function PayoutInfoStep({ initialData, onSave }: PayoutInfoStepProps) {
       <div className="rounded-md border border-brand-orange/20 bg-brand-orange/5 px-4 py-3 text-xs text-brand-black/70">
         Payouts are processed every two weeks. Minimum payout threshold is
         ₱5,000.
+      </div>
+
+      <div className="flex gap-3 pt-2">
+        <button
+          type="submit"
+          disabled={isSaving}
+          className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+        >
+          {isSaving ? 'Saving…' : 'Save & Continue'}
+        </button>
+        {onSkip && (
+          <button
+            type="button"
+            onClick={() => void onSkip()}
+            disabled={isSkipping}
+            className="rounded-lg border px-4 py-2.5 text-sm font-medium disabled:opacity-50"
+          >
+            {isSkipping ? 'Skipping…' : 'Skip'}
+          </button>
+        )}
       </div>
     </form>
   )
