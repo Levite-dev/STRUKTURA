@@ -20,7 +20,11 @@ export const envSchema = z.object({
   UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
 
   THROTTLE_TTL_SECONDS: z.coerce.number().int().positive().default(60),
-  THROTTLE_LIMIT: z.coerce.number().int().positive().default(10),
+  THROTTLE_LIMIT: z.coerce.number().int().positive().default(120),
+
+  AUTH_SKIP_EMAIL_CONFIRM: z
+    .enum(['true', 'false'])
+    .default('false'),
 });
 
 export type Env = z.infer<typeof envSchema>;

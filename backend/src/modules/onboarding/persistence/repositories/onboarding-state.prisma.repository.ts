@@ -508,6 +508,7 @@ export class OnboardingStatePrismaRepository implements OnboardingStateRepositor
             title: step.title,
             description: step.description,
             stepOrder: index + 1,
+            phase: 1,
             isRequired: step.isRequired ?? true,
             isSkippable: step.isSkippable ?? false,
             estimatedMinutes: step.estimatedMinutes ?? null,

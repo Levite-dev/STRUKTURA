@@ -28,7 +28,7 @@ export class DeliverySettingHandler implements StepHandler {
     const profile = await this.prisma.supplierProfile.upsert({
       where: { userId },
       update: {},
-      create: { userId, businessName: 'My Store' },
+      create: { userId, businessName: 'My Store', businessAddress: '' },
     });
     await this.prisma.deliverySetting.upsert({
       where: { supplierProfileId: profile.id },

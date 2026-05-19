@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../../../shared/infrastructure/prisma/prisma.service';
 import { StepHandler } from '../step-handler.registry';
 import { z } from 'zod';
@@ -8,7 +9,7 @@ const schema = z.object({
   bio: z.string().optional(),
   skills: z.array(z.string()).optional(),
   previousEmployer: z.string().optional(),
-  workHistoryJson: z.record(z.unknown()).optional(),
+  workHistoryJson: z.record(z.string(), z.unknown()).optional(),
   expectedDailyRate: z.number().optional(),
 });
 
@@ -23,16 +24,26 @@ export class JobSeekerProfilePatchHandler implements StepHandler {
     data: unknown,
   ): Promise<void> {
     const parsed = schema.parse(data);
+    const { workHistoryJson, expectedDailyRate, ...rest } = parsed;
+    const workHistory =
+      workHistoryJson !== undefined
+        ? (workHistoryJson as Prisma.InputJsonValue)
+        : undefined;
+    const dailyRate = expectedDailyRate?.toString();
+
     await this.prisma.jobSeekerProfile.upsert({
       where: { userId },
       update: {
-        ...parsed,
-        expectedDailyRate: parsed.expectedDailyRate?.toString(),
+        ...rest,
+        ...(workHistory !== undefined && { workHistoryJson: workHistory }),
+        ...(dailyRate !== undefined && { expectedDailyRate: dailyRate }),
       },
       create: {
         userId,
-        ...parsed,
-        expectedDailyRate: parsed.expectedDailyRate?.toString(),
+        yearsExperience: 0,
+        ...rest,
+        ...(workHistory !== undefined && { workHistoryJson: workHistory }),
+        ...(dailyRate !== undefined && { expectedDailyRate: dailyRate }),
       },
     });
   }

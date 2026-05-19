@@ -9,7 +9,9 @@ export const userKeys = {
 export function useMe() {
   return useQuery({
     queryKey: userKeys.me,
-    queryFn: () => apiGet<{ user: AppUser }>('/users/me').then((r) => r.user),
+    queryFn: () => apiGet<AppUser>('/users/me'),
+    retry: false,
+    staleTime: 30_000,
   })
 }
 

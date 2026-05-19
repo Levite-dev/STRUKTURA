@@ -29,7 +29,7 @@ export class ContractorServiceHandler implements StepHandler {
     const profile = await this.prisma.contractorProfile.upsert({
       where: { userId },
       update: {},
-      create: { userId },
+      create: { userId, yearsExperience: 0 },
     });
     await this.prisma.contractorService.create({
       data: { contractorProfileId: profile.id, ...parsed },

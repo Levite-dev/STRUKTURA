@@ -1,6 +1,7 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 
+import { AuthModule } from '../auth/auth.module';
 import { UsersController } from './presentation/controllers/users.controller';
 import { UserPrismaRepository } from './persistence/repositories/user.prisma.repository';
 import { USER_REPOSITORY } from './domain/repositories/user.repository';
@@ -26,7 +27,7 @@ const CommandHandlers = [
 const QueryHandlers = [GetUserByIdHandler, GetUserBySupabaseIdHandler];
 
 @Module({
-  imports: [CqrsModule],
+  imports: [CqrsModule, forwardRef(() => AuthModule)],
   controllers: [UsersController],
   providers: [
     UserPrismaRepository,

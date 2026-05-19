@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 
 import { UsersModule } from '../users/users.module';
@@ -32,7 +32,7 @@ const CommandHandlers = [
 ];
 
 @Module({
-  imports: [CqrsModule, UsersModule],
+  imports: [CqrsModule, forwardRef(() => UsersModule)],
   controllers: [AuthController, AuthWebhooksController],
   providers: [
     SupabaseClientFactory,

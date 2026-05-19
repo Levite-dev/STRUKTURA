@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Link, useNavigate } from "@tanstack/react-router"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -13,6 +13,7 @@ import {
   ViewOffSlashIcon,
 } from "@hugeicons/core-free-icons"
 import { useAuth } from "@/lib/auth-context"
+import { friendlyAuthError } from "@/lib/auth-errors"
 import { AuthShell } from "./auth-shell"
 
 const schema = z.object({
@@ -26,10 +27,11 @@ type FormValues = z.infer<typeof schema>
 
 export function SignupPage() {
   const navigate = useNavigate()
-  const { signUp } = useAuth()
+  const { signUp, user, session } = useAuth()
   const [showPw, setShowPw] = useState(false)
   const [agree, setAgree] = useState(false)
   const [serverError, setServerError] = useState("")
+  const [pendingRedirect, setPendingRedirect] = useState(false)
 
   const {
     register,
@@ -37,15 +39,25 @@ export function SignupPage() {
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({ resolver: zodResolver(schema) })
 
+  // Navigate once the auth context has populated session + user so route
+  // guards see an authenticated state. Avoids race where navigate fires
+  // before React has applied the new auth state.
+  useEffect(() => {
+    if (pendingRedirect && session && user) {
+      const target = user.roles.length === 0 ? "/onboarding/role-select" : "/dashboard"
+      navigate({ to: target })
+    }
+  }, [pendingRedirect, session, user, navigate])
+
   const onSubmit = async (data: FormValues) => {
     if (!agree) return
     setServerError("")
     try {
       await signUp(data.email, data.password, data.firstName, data.lastName, data.phone)
       sessionStorage.setItem("struktura:signup-email", data.email)
-      navigate({ to: "/auth/verify-email" })
+      setPendingRedirect(true)
     } catch (err) {
-      setServerError(err instanceof Error ? err.message : "Something went wrong")
+      setServerError(friendlyAuthError(err, "signup"))
     }
   }
 
@@ -133,7 +145,14 @@ export function SignupPage() {
           )}
         </Field>
 
-        {serverError && <p className="text-sm text-destructive">{serverError}</p>}
+        {serverError && (
+          <div
+            role="alert"
+            className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+          >
+            {serverError}
+          </div>
+        )}
 
         {/* Terms */}
         <label className="flex items-start gap-2.5 text-xs text-brand-black/75">

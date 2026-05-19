@@ -12,8 +12,10 @@ import { VerificationRequiredException } from '../../../onboarding/domain/servic
 export const VERIFICATION_KEY = 'requiredVerification';
 
 export function RequiresVerification(action: GatedAction): MethodDecorator {
-  return (target, key, descriptor) => {
-    Reflect.defineMetadata(VERIFICATION_KEY, action, descriptor.value);
+  return (_target, _key, descriptor) => {
+    if (descriptor.value) {
+      Reflect.defineMetadata(VERIFICATION_KEY, action, descriptor.value);
+    }
     return descriptor;
   };
 }

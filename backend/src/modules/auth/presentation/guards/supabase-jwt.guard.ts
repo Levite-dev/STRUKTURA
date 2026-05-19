@@ -6,7 +6,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { QueryBus } from '@nestjs/cqrs';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import type { Request } from 'express';
 
 import { IS_PUBLIC_KEY } from '../../../../shared/presentation/decorators';
@@ -15,9 +15,9 @@ import {
   AUTH_PROVIDER_PORT,
   type AuthProviderPort,
 } from '../../application/ports/auth-provider.port';
-import { InvalidTokenException } from '../../domain/exceptions/auth.exceptions';
 import { UnauthorizedException } from '../../../../shared/domain/exceptions';
 import { GetUserBySupabaseIdQuery } from '../../../users/application/queries/get-user-by-supabase-id/get-user-by-supabase-id.query';
+import { SyncSupabaseUserCommand } from '../../../users/application/commands/sync-supabase-user/sync-supabase-user.command';
 import { User } from '../../../users/domain/entities/user.entity';
 
 @Injectable()
@@ -28,6 +28,7 @@ export class SupabaseJwtGuard implements CanActivate {
     private readonly reflector: Reflector,
     @Inject(AUTH_PROVIDER_PORT) private readonly authProvider: AuthProviderPort,
     private readonly queryBus: QueryBus,
+    private readonly commandBus: CommandBus,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -49,13 +50,29 @@ export class SupabaseJwtGuard implements CanActivate {
 
     const claims = await this.authProvider.verifyAccessToken(token);
 
-    const user = await this.queryBus.execute<
+    let user = await this.queryBus.execute<
       GetUserBySupabaseIdQuery,
       User | null
     >(new GetUserBySupabaseIdQuery(claims.sub));
+
     if (!user) {
-      throw new InvalidTokenException(
-        'Authenticated user is not provisioned in the database.',
+      // Lazy-provision: Supabase user exists (token verified) but internal
+      // mirror row is missing (e.g. legacy account, prior signup interrupted,
+      // OAuth-only account). Idempotent — safe under concurrent requests via
+      // unique constraint on supabaseAuthId.
+      this.logger.log(
+        { supabaseAuthId: claims.sub },
+        'Lazy-provisioning internal user from valid Supabase token',
+      );
+      user = await this.commandBus.execute<SyncSupabaseUserCommand, User>(
+        new SyncSupabaseUserCommand(
+          claims.sub,
+          claims.email,
+          null,
+          null,
+          null,
+          claims.emailVerified ? new Date() : null,
+        ),
       );
     }
 

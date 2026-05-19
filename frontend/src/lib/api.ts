@@ -14,6 +14,31 @@ export function getAccessToken(): string | null {
   return accessToken;
 }
 
+export class ApiError extends Error {
+  status: number;
+  body: unknown;
+  retryAfterSeconds?: number;
+  constructor(status: number, message: string, body: unknown) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.body = body;
+    if (body && typeof body === 'object' && 'retryAfterSeconds' in body) {
+      const ra = (body as { retryAfterSeconds: unknown }).retryAfterSeconds;
+      if (typeof ra === 'number') this.retryAfterSeconds = ra;
+    }
+  }
+}
+
+async function parseError(res: Response): Promise<ApiError> {
+  const bodyJson = await res.json().catch(() => null);
+  const detail =
+    (bodyJson && typeof bodyJson === 'object' && 'detail' in bodyJson
+      ? String((bodyJson as { detail: unknown }).detail)
+      : undefined) ?? res.statusText;
+  return new ApiError(res.status, detail, bodyJson);
+}
+
 async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
   const baseUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
@@ -35,12 +60,12 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
         headers,
         body: body !== undefined ? JSON.stringify(body) : undefined,
       });
-      if (!retry.ok) throw new Error(await retry.text());
+      if (!retry.ok) throw await parseError(retry);
       return retry.json() as Promise<T>;
     }
   }
 
-  if (!res.ok) throw new Error(await res.text());
+  if (!res.ok) throw await parseError(res);
   if (res.status === 204) return undefined as T;
   return res.json() as Promise<T>;
 }
@@ -53,17 +78,6 @@ export const apiPatch = <T>(path: string, body?: unknown): Promise<T> =>
 export const apiDelete = <T>(path: string): Promise<T> => request<T>('DELETE', path);
 
 // Legacy `api` function kept for backwards compatibility with existing callers
-export class ApiError extends Error {
-  status: number;
-  body: unknown;
-  constructor(status: number, message: string, body: unknown) {
-    super(message);
-    this.name = 'ApiError';
-    this.status = status;
-    this.body = body;
-  }
-}
-
 type FetchOptions = RequestInit & { requireAuth?: boolean };
 
 export async function api<T>(path: string, options: FetchOptions = {}): Promise<T> {

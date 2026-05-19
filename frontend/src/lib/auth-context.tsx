@@ -55,8 +55,7 @@ type AuthContextValue = {
 const AuthContext = createContext<AuthContextValue | null>(null)
 
 async function fetchMe(): Promise<AppUser> {
-  const data = await apiGet<{ user: AppUser }>('/users/me')
-  return data.user
+  return apiGet<AppUser>('/users/me')
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -118,10 +117,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       lastName: string,
       phone?: string,
     ) => {
-      const { error } = await supabase.auth.signUp({ email, password })
-      if (error) throw error
-      // Also create the backend user record
+      // Backend creates the Supabase auth user (admin path when AUTH_SKIP_EMAIL_CONFIRM=true)
+      // plus mirrors the internal users row. No client-side supabase.auth.signUp to avoid
+      // the anon 60s email rate-limit.
       await apiPost('/auth/signup', { email, password, firstName, lastName, phone })
+
+      // Immediately sign in to obtain a Supabase session.
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+      if (signInError) throw signInError
     },
     [],
   )

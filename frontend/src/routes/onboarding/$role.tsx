@@ -58,6 +58,7 @@ function OnboardingWizard() {
   }
 
   if (!currentStep || roleState?.status === 'COMPLETED') {
+    const dashboardPath = `/dashboard/${normalizedRole.toLowerCase().replace('_', '-')}`
     return (
       <div className="flex flex-col items-center justify-center h-screen gap-4">
         <h1 className="text-2xl font-bold">All done!</h1>
@@ -65,7 +66,7 @@ function OnboardingWizard() {
           Your {normalizedRole.replace('_', ' ').toLowerCase()} profile is set up.
         </p>
         <button
-          onClick={() => navigate({ to: '/dashboard' })}
+          onClick={() => navigate({ to: dashboardPath })}
           className="bg-primary text-primary-foreground rounded px-6 py-2"
         >
           Go to Dashboard

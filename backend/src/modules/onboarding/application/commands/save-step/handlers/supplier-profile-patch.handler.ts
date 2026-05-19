@@ -30,8 +30,9 @@ export class SupplierProfilePatchHandler implements StepHandler {
       update: parsed,
       create: {
         userId,
-        businessName: parsed.businessName ?? 'My Store',
         ...parsed,
+        businessName: parsed.businessName ?? 'My Store',
+        businessAddress: '',
       },
     });
   }

@@ -26,7 +26,7 @@ export class QuotationTemplateHandler implements StepHandler {
     const profile = await this.prisma.contractorProfile.upsert({
       where: { userId },
       update: {},
-      create: { userId },
+      create: { userId, yearsExperience: 0 },
     });
     await this.prisma.quotationTemplate.create({
       data: { contractorProfileId: profile.id, ...parsed },

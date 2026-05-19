@@ -26,7 +26,7 @@ describe('Signup to first step (integration)', () => {
 
   afterAll(async () => {
     await prisma.userOnboardingStepProgress.deleteMany({
-      where: { userOnboardingProgress: { userId } },
+      where: { progress: { userId } },
     });
     await prisma.userOnboardingProgress.deleteMany({ where: { userId } });
     await prisma.userRole.deleteMany({ where: { userId } });

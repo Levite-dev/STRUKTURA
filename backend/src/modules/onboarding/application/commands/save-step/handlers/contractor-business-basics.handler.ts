@@ -6,7 +6,7 @@ import { z } from 'zod';
 const schema = z.object({
   businessName: z.string().min(1).optional(),
   businessDescription: z.string().optional(),
-  yearsOfExperience: z.number().optional(),
+  yearsExperience: z.number().int().nonnegative().optional(),
   coverImageUrl: z.string().optional(),
 });
 
@@ -24,7 +24,13 @@ export class ContractorBusinessBasicsHandler implements StepHandler {
     await this.prisma.contractorProfile.upsert({
       where: { userId },
       update: parsed,
-      create: { userId, ...parsed },
+      create: {
+        userId,
+        yearsExperience: parsed.yearsExperience ?? 0,
+        businessName: parsed.businessName,
+        businessDescription: parsed.businessDescription,
+        coverImageUrl: parsed.coverImageUrl,
+      },
     });
   }
 }
