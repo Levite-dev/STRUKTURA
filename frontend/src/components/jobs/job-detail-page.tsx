@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router"
+import { useNavigate, Link } from "@tanstack/react-router"
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
   Location01Icon,
@@ -14,6 +14,7 @@ import { Breadcrumbs } from "@/components/shared/breadcrumbs"
 import { Badge } from "@/components/ui/badge"
 import { UserAvatar as Avatar } from "@/components/shared/user-avatar"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { useActionGate } from "@/components/onboarding/action-gate-provider"
 import { type Job } from "./jobs-data"
 import { bidsForJob } from "./bids-data"
 import { BidsList } from "./bids-list"
@@ -22,6 +23,14 @@ export function JobDetailPage({ job }: { job: Job }) {
   const bids = bidsForJob(job.id)
   const lowest = bids.length ? Math.min(...bids.map((b) => b.amount)) : null
   const highest = bids.length ? Math.max(...bids.map((b) => b.amount)) : null
+  const { require } = useActionGate()
+  const navigate = useNavigate()
+
+  const handleApply = async () => {
+    const result = await require({ role: 'JOB_SEEKER', phase: 2, addRoleIfMissing: true, reason: 'Complete your job seeker profile to apply' })
+    if (result === 'cancelled') return
+    navigate({ to: '/jobs/$jobId/bid', params: { jobId: job.id } })
+  }
 
   return (
     <div className="bg-background">
@@ -98,13 +107,13 @@ export function JobDetailPage({ job }: { job: Job }) {
                         Submit your bid in under 5 minutes. Funds held in escrow on award.
                       </p>
                     </div>
-                    <Link
-                      to="/jobs/$jobId/bid"
-                      params={{ jobId: job.id }}
+                    <button
+                      type="button"
+                      onClick={handleApply}
                       className="inline-flex h-11 items-center justify-center rounded-none bg-brand-orange px-6 text-xs font-semibold tracking-widest text-white uppercase transition-colors hover:bg-brand-orange-soft"
                     >
                       Submit bid
-                    </Link>
+                    </button>
                   </section>
                 </TabsContent>
 
@@ -172,13 +181,13 @@ export function JobDetailPage({ job }: { job: Job }) {
                   </div>
                 )}
 
-                <Link
-                  to="/jobs/$jobId/bid"
-                  params={{ jobId: job.id }}
+                <button
+                  type="button"
+                  onClick={handleApply}
                   className="inline-flex h-11 w-full items-center justify-center rounded-none bg-brand-orange text-xs font-semibold tracking-widest text-white uppercase transition-colors hover:bg-brand-orange-soft"
                 >
                   Submit a bid
-                </Link>
+                </button>
                 <Link
                   to="/messages"
                   search={{ to: job.id }}

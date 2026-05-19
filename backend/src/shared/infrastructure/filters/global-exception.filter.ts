@@ -16,6 +16,7 @@ import {
   ForbiddenException as DomainForbidden,
   ValidationException as DomainValidation,
   BadRequestException as DomainBadRequest,
+  TooManyRequestsException as DomainTooManyRequests,
 } from '../../domain/exceptions';
 
 interface ProblemDetails {
@@ -99,6 +100,19 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         traceId,
       );
       p.errors = exception.errors;
+      return p;
+    }
+    if (exception instanceof DomainTooManyRequests) {
+      const p = this.build(
+        HttpStatus.TOO_MANY_REQUESTS,
+        exception.code,
+        exception.message,
+        traceId,
+      );
+      if (exception.retryAfterSeconds !== undefined) {
+        (p as ProblemDetails & { retryAfterSeconds: number }).retryAfterSeconds =
+          exception.retryAfterSeconds;
+      }
       return p;
     }
     if (exception instanceof DomainBadRequest) {

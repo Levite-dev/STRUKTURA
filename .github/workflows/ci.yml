@@ -24,6 +24,8 @@ jobs:
         working-directory: backend
       - run: pnpm prisma generate
         working-directory: backend
+        env:
+          DATABASE_URL: postgresql://localhost/prisma_generate
       - run: pnpm lint
         working-directory: backend
 

@@ -37,15 +37,20 @@ export class UserPrismaRepository implements UserRepository {
   async create(input: {
     supabaseAuthId: string;
     email: string;
-    fullName?: string | null;
+    firstName?: string | null;
+    lastName?: string | null;
+    phone?: string | null;
     emailVerifiedAt?: Date | null;
   }): Promise<User> {
     const record = await this.prisma.user.create({
       data: {
         supabaseAuthId: input.supabaseAuthId,
         email: input.email,
-        fullName: input.fullName ?? null,
+        firstName: input.firstName ?? null,
+        lastName: input.lastName ?? null,
+        phone: input.phone ?? null,
         emailVerifiedAt: input.emailVerifiedAt ?? null,
+        primaryRole: null,
       },
       include: { userRoles: true },
     });

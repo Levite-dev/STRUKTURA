@@ -1,4 +1,5 @@
-import { Link } from "@tanstack/react-router"
+import { Link, useNavigate } from "@tanstack/react-router"
+import { useActionGate } from "@/components/onboarding/action-gate-provider"
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
   Location01Icon,
@@ -23,6 +24,15 @@ import { PortfolioGallery } from "./portfolio-gallery"
 import { AvailabilityCalendar } from "./availability-calendar"
 
 export function ContractorProfilePage({ contractor }: { contractor: Contractor }) {
+  const { require } = useActionGate()
+  const navigate = useNavigate()
+
+  const handleRequestQuotation = async () => {
+    const result = await require({ role: 'CLIENT', phase: 2, reason: 'Complete your client profile to request a quotation' })
+    if (result === 'cancelled') return
+    navigate({ to: '/jobs/post' })
+  }
+
   return (
     <div className="bg-background">
       <Header />
@@ -102,12 +112,13 @@ export function ContractorProfilePage({ contractor }: { contractor: Contractor }
                   <HugeiconsIcon icon={Mail01Icon} className="size-4" />
                   Message
                 </Link>
-                <Link
-                  to="/jobs/post"
+                <button
+                  type="button"
+                  onClick={handleRequestQuotation}
                   className="inline-flex h-12 items-center justify-center rounded-none border border-border bg-white text-xs font-semibold tracking-widest text-brand-black uppercase hover:bg-muted"
                 >
                   Invite to bid
-                </Link>
+                </button>
                 <p className="text-center text-[10px] tracking-widest text-muted-foreground uppercase">
                   Escrow protected · 8% commission on award
                 </p>

@@ -61,6 +61,8 @@ export class LoginHandler implements ICommandHandler<
           session.supabaseAuthId,
           session.email,
           null,
+          null,
+          null,
           session.emailConfirmedAt,
         ),
       );

@@ -41,10 +41,22 @@ const FLOW_SEEDS: FlowSeed[] = [
     description: 'Basic client profile, address, and preferences.',
     targetRole: Role.CLIENT,
     steps: [
-      ['account_setup', 'Account Setup', 'Confirm account type and contact details.'],
+      [
+        'account_setup',
+        'Account Setup',
+        'Confirm account type and contact details.',
+      ],
       ['profile_setup', 'Profile Setup', 'Add your name and contact profile.'],
-      ['address_setup', 'Address Setup', 'Add your primary project or delivery address.'],
-      ['preferences_setup', 'Preferences', 'Choose services and product categories.'],
+      [
+        'address_setup',
+        'Address Setup',
+        'Add your primary project or delivery address.',
+      ],
+      [
+        'preferences_setup',
+        'Preferences',
+        'Choose services and product categories.',
+      ],
     ].map(([stepCode, title, description], index) => ({
       stepCode,
       title,
@@ -58,12 +70,32 @@ const FLOW_SEEDS: FlowSeed[] = [
     description: 'Contractor profile, services, portfolio, and verification.',
     targetRole: Role.CONTRACTOR,
     steps: [
-      ['account_setup', 'Account Setup', 'Confirm account type and contact details.'],
-      ['contractor_profile', 'Contractor Profile', 'Add business and experience details.'],
-      ['service_setup', 'Service Setup', 'Describe services and service coverage.'],
+      [
+        'account_setup',
+        'Account Setup',
+        'Confirm account type and contact details.',
+      ],
+      [
+        'contractor_profile',
+        'Contractor Profile',
+        'Add business and experience details.',
+      ],
+      [
+        'service_setup',
+        'Service Setup',
+        'Describe services and service coverage.',
+      ],
       ['portfolio_upload', 'Portfolio Upload', 'Share previous work samples.'],
-      ['document_upload', 'Document Upload', 'Provide verification document links.'],
-      ['verification_submission', 'Verification Submission', 'Review and submit for verification.'],
+      [
+        'document_upload',
+        'Document Upload',
+        'Provide verification document links.',
+      ],
+      [
+        'verification_submission',
+        'Verification Submission',
+        'Review and submit for verification.',
+      ],
     ].map(([stepCode, title, description]) => ({
       stepCode,
       title,
@@ -77,13 +109,33 @@ const FLOW_SEEDS: FlowSeed[] = [
     description: 'Store profile, first product, inventory, and verification.',
     targetRole: Role.SUPPLIER,
     steps: [
-      ['account_setup', 'Account Setup', 'Confirm account type and contact details.'],
-      ['supplier_profile', 'Supplier Profile', 'Add store and contact details.'],
-      ['business_information', 'Business Information', 'Add registration and business details.'],
+      [
+        'account_setup',
+        'Account Setup',
+        'Confirm account type and contact details.',
+      ],
+      [
+        'supplier_profile',
+        'Supplier Profile',
+        'Add store and contact details.',
+      ],
+      [
+        'business_information',
+        'Business Information',
+        'Add registration and business details.',
+      ],
       ['product_setup', 'Product Setup', 'Add your first product listing.'],
       ['inventory_setup', 'Inventory Setup', 'Add initial stock information.'],
-      ['document_upload', 'Document Upload', 'Provide verification document links.'],
-      ['verification_submission', 'Verification Submission', 'Review and submit for verification.'],
+      [
+        'document_upload',
+        'Document Upload',
+        'Provide verification document links.',
+      ],
+      [
+        'verification_submission',
+        'Verification Submission',
+        'Review and submit for verification.',
+      ],
     ].map(([stepCode, title, description]) => ({
       stepCode,
       title,
@@ -173,9 +225,7 @@ type ProgressRecord = Prisma.UserOnboardingProgressGetPayload<{
 }>;
 
 @Injectable()
-export class OnboardingStatePrismaRepository
-  implements OnboardingStateRepository
-{
+export class OnboardingStatePrismaRepository implements OnboardingStateRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async findByUserAndRole(
@@ -362,11 +412,18 @@ export class OnboardingStatePrismaRepository
       },
       include: progressInclude,
     });
-    await this.syncUserOnboardingFields(record.userId, record.flow.targetRole, record);
+    await this.syncUserOnboardingFields(
+      record.userId,
+      record.flow.targetRole,
+      record,
+    );
     return this.toSnapshot(record);
   }
 
-  async reject(id: string, reason: string): Promise<OnboardingProgressSnapshot> {
+  async reject(
+    id: string,
+    reason: string,
+  ): Promise<OnboardingProgressSnapshot> {
     const existing = await this.findById(id);
     if (!existing) throw new OnboardingNotFoundException();
     if (existing.status !== OnboardingProgressStatus.PENDING_VERIFICATION) {
@@ -384,7 +441,11 @@ export class OnboardingStatePrismaRepository
       },
       include: progressInclude,
     });
-    await this.syncUserOnboardingFields(record.userId, record.flow.targetRole, record);
+    await this.syncUserOnboardingFields(
+      record.userId,
+      record.flow.targetRole,
+      record,
+    );
     return this.toSnapshot(record);
   }
 
@@ -447,6 +508,7 @@ export class OnboardingStatePrismaRepository
             title: step.title,
             description: step.description,
             stepOrder: index + 1,
+            phase: 1,
             isRequired: step.isRequired ?? true,
             isSkippable: step.isSkippable ?? false,
             estimatedMinutes: step.estimatedMinutes ?? null,
@@ -524,9 +586,11 @@ export class OnboardingStatePrismaRepository
     };
   }
 
-  private asObject(value: Prisma.JsonValue | undefined): Record<string, unknown> {
+  private asObject(
+    value: Prisma.JsonValue | undefined,
+  ): Record<string, unknown> {
     if (value && typeof value === 'object' && !Array.isArray(value)) {
-      return value as Record<string, unknown>;
+      return value;
     }
     return {};
   }

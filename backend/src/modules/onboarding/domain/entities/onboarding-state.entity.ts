@@ -1,4 +1,7 @@
-import { OnboardingStatus, Role } from '@prisma/client';
+import {
+  OnboardingProgressStatus as OnboardingStatus,
+  Role,
+} from '@prisma/client';
 import {
   ONBOARDING_STEPS,
   isValidStep,

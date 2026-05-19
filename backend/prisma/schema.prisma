@@ -18,14 +18,6 @@ enum Role {
   SUPPORT
 }
 
-enum OnboardingStatus {
-  NOT_STARTED
-  IN_PROGRESS
-  PENDING_VERIFICATION
-  COMPLETED
-  REJECTED
-}
-
 enum OnboardingProgressStatus {
   NOT_STARTED
   IN_PROGRESS
@@ -61,6 +53,66 @@ enum VerificationLevel {
   TOP_RATED
 }
 
+enum OnboardingTriggerType {
+  ACTION_GATE
+  PERSISTENT_CARD
+  INTERNAL
+}
+
+enum DocumentType {
+  VALID_ID
+  BUSINESS_PERMIT
+  TESDA
+  NBI
+  POLICE
+  LICENSE
+  CERTIFICATE
+  TAX_DOC
+  RECOMMENDATION
+  OTHER
+}
+
+enum DocumentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  EXPIRED
+}
+
+enum DocumentOwnerType {
+  CONTRACTOR_PROFILE
+  SUPPLIER_PROFILE
+  JOB_SEEKER_PROFILE
+  USER
+}
+
+enum PortfolioOwnerType {
+  CONTRACTOR_PROFILE
+  JOB_SEEKER_PROFILE
+}
+
+enum PricingType {
+  FIXED
+  HOURLY
+  DAILY
+  PER_SQM
+  PER_PROJECT
+  QUOTE_BASED
+}
+
+enum PayoutMethod {
+  BANK
+  GCASH
+  MAYA
+}
+
+enum AddressOwnerType {
+  CLIENT_PROFILE
+  CONTRACTOR_PROFILE
+  SUPPLIER_PROFILE
+  JOB_SEEKER_PROFILE
+}
+
 // ─── Core User ────────────────────────────────────────────────────────────────
 
 model User {
@@ -68,7 +120,8 @@ model User {
   supabaseAuthId        String                   @unique
   email                 String                   @unique
   emailVerifiedAt       DateTime?
-  fullName              String?
+  firstName             String?
+  lastName              String?
   phone                 String?
   avatarUrl             String?
   status                UserStatus               @default(ACTIVE)
@@ -82,13 +135,16 @@ model User {
   updatedAt             DateTime                 @updatedAt
 
   userRoles          UserRole[]
-  onboardingStates   OnboardingState[]
   onboardingProgress UserOnboardingProgress[]
   clientProfile      ClientProfile?
   contractorProfile  ContractorProfile?
   supplierProfile    SupplierProfile?
   jobSeekerProfile   JobSeekerProfile?
   auditLogs          AuditLog[]
+  addresses          Address[]
+  documents          Document[]
+  portfolioItems     PortfolioItem[]
+  payoutAccounts     PayoutAccount[]
 
   @@index([email])
   @@index([supabaseAuthId])
@@ -112,26 +168,6 @@ model UserRole {
 
 // ─── Onboarding ───────────────────────────────────────────────────────────────
 
-model OnboardingState {
-  id           String           @id @default(cuid())
-  userId       String
-  role         Role
-  status       OnboardingStatus @default(NOT_STARTED)
-  currentStep  String?
-  data         Json             @default("{}")
-  startedAt    DateTime?
-  completedAt  DateTime?
-  rejectedAt   DateTime?
-  rejectReason String?
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime         @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, role])
-  @@index([status])
-}
-
 model OnboardingFlow {
   id          String   @id @default(cuid())
   code        String   @unique
@@ -150,18 +186,21 @@ model OnboardingFlow {
 }
 
 model OnboardingStep {
-  id                 String   @id @default(cuid())
+  id                 String                @id @default(cuid())
   flowId             String
   stepCode           String
   title              String
   description        String?
   stepOrder          Int
-  isRequired         Boolean  @default(true)
-  isSkippable        Boolean  @default(false)
+  isRequired         Boolean               @default(true)
+  isSkippable        Boolean               @default(false)
   requiredPermission String?
   estimatedMinutes   Int?
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  phase              Int
+  triggerType        OnboardingTriggerType @default(INTERNAL)
+  fieldGroupCode     String?
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
 
   flow               OnboardingFlow               @relation(fields: [flowId], references: [id], onDelete: Cascade)
   requirements       OnboardingRequirement[]
@@ -171,6 +210,7 @@ model OnboardingStep {
   @@unique([flowId, stepCode])
   @@unique([flowId, stepOrder])
   @@index([stepCode])
+  @@index([flowId, phase])
 }
 
 model UserOnboardingProgress {
@@ -241,13 +281,6 @@ model OnboardingRequirement {
 model ClientProfile {
   id                  String   @id @default(cuid())
   userId              String   @unique
-  firstName           String?
-  lastName            String?
-  phone               String?
-  region              String?
-  city                String?
-  province            String?
-  address             String?
   preferredCategories String[]
   interestedServices  String[]
   preferredLocation   String?
@@ -258,70 +291,58 @@ model ClientProfile {
 }
 
 model ContractorProfile {
-  id                    String            @id @default(cuid())
-  userId                String            @unique
-  businessName          String?
-  businessDescription   String?
-  serviceArea           String?
-  serviceCategories     String[]
-  trade                 String            @default("")
-  yearsExperience       Int
-  bio                   String?
-  expertiseTags         String[]
-  location              String?
-  city                  String?
-  province              String?
-  contactPerson         String?
-  contactNumber         String?
-  businessEmail         String?
-  profileImageUrl       String?
-  coverImageUrl         String?
-  portfolioFiles        Json?
-  verificationDocuments Json?
-  verificationLevel     VerificationLevel @default(UNVERIFIED)
-  createdAt             DateTime          @default(now())
-  updatedAt             DateTime          @updatedAt
+  id                  String            @id @default(cuid())
+  userId              String            @unique
+  businessName        String?
+  businessDescription String?
+  yearsExperience     Int
+  bio                 String?
+  expertiseTags       String[]
+  city                String?
+  province            String?
+  contactPerson       String?
+  contactNumber       String?
+  businessEmail       String?
+  profileImageUrl     String?
+  coverImageUrl       String?
+  verificationLevel   VerificationLevel @default(UNVERIFIED)
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  services           ContractorService[]
+  quotationTemplates QuotationTemplate[]
 
-  @@index([trade])
   @@index([verificationLevel])
 }
 
 model SupplierProfile {
-  id                    String    @id @default(cuid())
-  userId                String    @unique
-  businessName          String
-  storeName             String?
-  businessDescription   String?
-  contactPerson         String?
-  contactNumber         String?
-  businessEmail         String?
-  businessAddress       String
-  city                  String?
-  province              String?
-  profileImageUrl       String?
-  coverImageUrl         String?
-  businessRegNo         String?
-  businessType          String?
-  taxId                 String?
-  yearsOperating        Int?
-  operatingHours        String?
-  deliveryAreas         String[]
-  productCategory       String?
-  firstProduct          String?
-  inventoryStock        Int?
-  verificationDocuments Json?
-  deliveryAvailable     Boolean?
-  pickupAvailable       Boolean?
-  payoutBankName        String?
-  payoutAcctName        String?
-  payoutAcctNo          String?
-  verifiedAt            DateTime?
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
+  id                  String    @id @default(cuid())
+  userId              String    @unique
+  businessName        String
+  storeName           String?
+  businessDescription String?
+  contactPerson       String?
+  contactNumber       String?
+  businessEmail       String?
+  businessAddress     String
+  city                String?
+  province            String?
+  profileImageUrl     String?
+  coverImageUrl       String?
+  businessRegNo       String?
+  businessType        String?
+  taxId               String?
+  tinNumber           String?
+  yearsOperating      Int?
+  operatingHours      String?
+  storePhotos         String[]
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  products        Product[]
+  deliverySetting DeliverySetting?
 
   @@index([businessName])
 }
@@ -329,10 +350,9 @@ model SupplierProfile {
 model JobSeekerProfile {
   id                    String    @id @default(cuid())
   userId                String    @unique
-  firstName             String?
-  lastName              String?
-  location              String?
   primarySkill          String?
+  skillCategory         String?
+  bio                   String?
   additionalSkills      String[]
   skills                String[]
   yearsExperience       Int
@@ -343,8 +363,8 @@ model JobSeekerProfile {
   willingToTravel       Boolean?
   toolsOwned            String[]
   experienceDescription String?
-  portfolioFiles        Json?
-  verificationDocuments Json?
+  previousEmployer      String?
+  workHistoryJson       Json?
   availabilityStatus    String?
   availableFrom         DateTime?
   resumeUrl             String?
@@ -352,6 +372,179 @@ model JobSeekerProfile {
   updatedAt             DateTime  @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─── Normalized relation tables ───────────────────────────────────────────────
+
+model Address {
+  id           String           @id @default(cuid())
+  userId       String
+  ownerType    AddressOwnerType
+  label        String?
+  line1        String
+  line2        String?
+  barangay     String?
+  city         String
+  province     String
+  postalCode   String?
+  contactName  String?
+  contactPhone String?
+  isDefault    Boolean          @default(false)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, ownerType])
+  @@index([userId, isDefault])
+}
+
+model Document {
+  id            String            @id @default(cuid())
+  ownerUserId   String
+  ownerType     DocumentOwnerType
+  type          DocumentType
+  status        DocumentStatus    @default(PENDING)
+  url           String
+  fileName      String?
+  mimeType      String?
+  sizeBytes     Int?
+  expiryDate    DateTime?
+  reviewedBy    String?
+  reviewedAt    DateTime?
+  rejectionNote String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  owner User @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+
+  @@index([ownerUserId, type])
+  @@index([ownerUserId, status])
+  @@index([type, status])
+}
+
+model PortfolioItem {
+  id           String             @id @default(cuid())
+  ownerUserId  String
+  ownerType    PortfolioOwnerType
+  title        String
+  description  String?
+  imageUrls    String[]
+  projectDate  DateTime?
+  clientName   String?
+  location     String?
+  tagsJson     Json?
+  displayOrder Int                @default(0)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  owner User @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+
+  @@index([ownerUserId, ownerType])
+}
+
+model ContractorService {
+  id                  String            @id @default(cuid())
+  contractorProfileId String
+  name                String
+  categories          String[]
+  pricingType         PricingType
+  basePriceMin        Decimal?
+  basePriceMax        Decimal?
+  serviceArea         String?
+  description         String?
+  availabilityStatus  String?
+  isActive            Boolean           @default(true)
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  contractorProfile ContractorProfile @relation(fields: [contractorProfileId], references: [id], onDelete: Cascade)
+
+  @@index([contractorProfileId, isActive])
+}
+
+model Product {
+  id                String          @id @default(cuid())
+  supplierProfileId String
+  name              String
+  categoryId        String?
+  unit              String
+  price             Decimal
+  marketPrice       Decimal?
+  discount          Decimal?
+  availableStock    Int
+  reservedStock     Int             @default(0)
+  reorderLevel      Int?
+  warehouseLocation String?
+  stockUnit         String?
+  description       String?
+  brand             String?
+  sku               String?
+  quality           String?
+  specifications    Json?
+  images            String[]
+  priceNotes        String?
+  isActive          Boolean         @default(true)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  supplierProfile SupplierProfile @relation(fields: [supplierProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([supplierProfileId, sku])
+  @@index([supplierProfileId, isActive])
+}
+
+model PayoutAccount {
+  id            String       @id @default(cuid())
+  userId        String
+  method        PayoutMethod
+  bankName      String?
+  accountName   String?
+  accountNumber String?
+  gcashNumber   String?
+  mayaNumber    String?
+  isDefault     Boolean      @default(false)
+  verifiedAt    DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, method])
+}
+
+model DeliverySetting {
+  id                  String          @id @default(cuid())
+  supplierProfileId   String          @unique
+  deliveryAreas       String[]
+  deliveryFee         Decimal?
+  deliveryAvailable   Boolean         @default(false)
+  pickupAvailable     Boolean         @default(false)
+  pickupAddress       String?
+  minOrderForDelivery Decimal?
+  estimatedDays       Int?
+  notes               String?
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  supplierProfile SupplierProfile @relation(fields: [supplierProfileId], references: [id], onDelete: Cascade)
+}
+
+model QuotationTemplate {
+  id                        String            @id @default(cuid())
+  contractorProfileId       String
+  name                      String
+  scopeOfWorkTemplate       String?
+  paymentTermsTemplate      String?
+  estimatedDurationTemplate String?
+  fileUrl                   String?
+  isDefault                 Boolean           @default(false)
+  createdAt                 DateTime          @default(now())
+  updatedAt                 DateTime          @updatedAt
+
+  contractorProfile ContractorProfile @relation(fields: [contractorProfileId], references: [id], onDelete: Cascade)
+
+  @@index([contractorProfileId])
 }
 
 // ─── Audit Trail (append-only) ────────────────────────────────────────────────

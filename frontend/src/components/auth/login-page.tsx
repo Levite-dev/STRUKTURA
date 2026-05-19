@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Link, useNavigate } from "@tanstack/react-router"
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
@@ -9,16 +9,27 @@ import {
   ViewOffSlashIcon,
 } from "@hugeicons/core-free-icons"
 import { useAuth } from "@/lib/auth-context"
+import { friendlyAuthError } from "@/lib/auth-errors"
 import { AuthShell } from "./auth-shell"
 
 export function LoginPage() {
   const navigate = useNavigate()
-  const { signIn, onboardingStates } = useAuth()
+  const { signIn, user, session } = useAuth()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPw, setShowPw] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const [pendingRedirect, setPendingRedirect] = useState(false)
+
+  // Wait for AuthProvider to populate session + user after sign-in
+  // before routing; otherwise route guards see isAuthenticated=false.
+  useEffect(() => {
+    if (pendingRedirect && session && user) {
+      const target = user.roles.length === 0 ? "/onboarding/role-select" : "/dashboard"
+      navigate({ to: target })
+    }
+  }, [pendingRedirect, session, user, navigate])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -26,18 +37,9 @@ export function LoginPage() {
     setLoading(true)
     try {
       await signIn(email, password)
-      const inProgress = onboardingStates.find(
-        (s) => s.status === "IN_PROGRESS" || s.status === "NOT_STARTED",
-      )
-      if (inProgress) {
-        navigate({ to: "/onboarding/$role", params: { role: inProgress.role } })
-      } else if (onboardingStates.length === 0) {
-        navigate({ to: "/onboarding/role-select" })
-      } else {
-        navigate({ to: "/dashboard" })
-      }
+      setPendingRedirect(true)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong")
+      setError(friendlyAuthError(err, "login"))
     } finally {
       setLoading(false)
     }
@@ -61,7 +63,12 @@ export function LoginPage() {
     >
       <form onSubmit={handleSubmit} className="space-y-5">
         {error && (
-          <p className="text-sm text-destructive">{error}</p>
+          <div
+            role="alert"
+            className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+          >
+            {error}
+          </div>
         )}
 
         <Field label="Email">
@@ -100,7 +107,9 @@ export function LoginPage() {
           disabled={loading}
           className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-orange py-3.5 text-sm font-semibold text-white transition-colors hover:bg-brand-orange-soft disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {loading && <span className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />}
+          {loading && (
+            <span className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+          )}
           Sign in
           <HugeiconsIcon icon={ArrowRight01Icon} className="size-3.5" />
         </button>
@@ -121,9 +130,7 @@ function Field({
   return (
     <div>
       <div className="flex items-baseline justify-between">
-        <label className="text-sm font-semibold text-brand-black">
-          {label}
-        </label>
+        <label className="text-sm font-semibold text-brand-black">{label}</label>
         {right}
       </div>
       <div className="mt-2">{children}</div>
@@ -180,10 +187,7 @@ function PasswordField({
         aria-label={show ? "Hide password" : "Show password"}
         className="absolute top-1/2 right-3 -translate-y-1/2 text-brand-black/45 transition-colors hover:text-brand-orange"
       >
-        <HugeiconsIcon
-          icon={show ? ViewOffSlashIcon : ViewIcon}
-          className="size-4"
-        />
+        <HugeiconsIcon icon={show ? ViewOffSlashIcon : ViewIcon} className="size-4" />
       </button>
     </div>
   )

@@ -11,7 +11,9 @@ export interface UserRepository {
   create(input: {
     supabaseAuthId: string;
     email: string;
-    fullName?: string | null;
+    firstName?: string | null;
+    lastName?: string | null;
+    phone?: string | null;
     emailVerifiedAt?: Date | null;
   }): Promise<User>;
 

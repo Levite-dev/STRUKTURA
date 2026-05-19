@@ -1,19 +1,26 @@
-import { OnboardingState as PrismaOnboardingState } from '@prisma/client';
+import { OnboardingProgressStatus, Prisma } from '@prisma/client';
 import { OnboardingState } from '../../domain/entities/onboarding-state.entity';
+
+type PrismaOnboardingState = Prisma.UserOnboardingProgressGetPayload<{
+  include: { flow: true };
+}>;
 
 export class OnboardingStateMapper {
   static toDomain(record: PrismaOnboardingState): OnboardingState {
     return OnboardingState.create({
       id: record.id,
       userId: record.userId,
-      role: record.role,
+      role: record.flow.targetRole,
       status: record.status,
-      currentStep: record.currentStep,
-      data: (record.data as Record<string, unknown>) ?? {},
+      currentStep: record.currentStepId,
+      data: {},
       startedAt: record.startedAt,
       completedAt: record.completedAt,
-      rejectedAt: record.rejectedAt,
-      rejectReason: record.rejectReason,
+      rejectedAt:
+        record.status === OnboardingProgressStatus.REJECTED
+          ? record.updatedAt
+          : null,
+      rejectReason: record.rejectionReason,
       createdAt: record.createdAt,
       updatedAt: record.updatedAt,
     });

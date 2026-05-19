@@ -5,3 +5,4 @@ export * from './unauthorized.exception';
 export * from './forbidden.exception';
 export * from './validation.exception';
 export * from './bad-request.exception';
+export * from './too-many-requests.exception';

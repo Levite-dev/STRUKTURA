@@ -13,6 +13,10 @@ type SkillsData = {
 type SkillsStepProps = {
   initialData?: SkillsData
   onSave: (data: SkillsData) => void
+  onNext?: (data: unknown) => void
+  onSkip?: () => void
+  isSaving?: boolean
+  isSkipping?: boolean
 }
 
 const COMMON_SKILLS = [
@@ -32,7 +36,7 @@ const COMMON_SKILLS = [
   "Safety Compliance",
 ]
 
-export function SkillsStep({ initialData, onSave }: SkillsStepProps) {
+export function SkillsStep({ initialData, onSave, onNext, onSkip, isSaving, isSkipping }: SkillsStepProps) {
   const [skills, setSkills] = useState<string[]>(initialData?.skills ?? [])
   const [yearsExperience, setYearsExperience] = useState(
     String(initialData?.yearsExperience ?? 0),
@@ -66,7 +70,12 @@ export function SkillsStep({ initialData, onSave }: SkillsStepProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onSave({ skills, yearsExperience: parseInt(yearsExperience, 10) || 0 })
+    const data = { skills, yearsExperience: parseInt(yearsExperience, 10) || 0 }
+    if (onNext) {
+      void onNext(data)
+    } else {
+      onSave(data)
+    }
   }
 
   return (
@@ -161,6 +170,26 @@ export function SkillsStep({ initialData, onSave }: SkillsStepProps) {
             </button>
           ))}
         </div>
+      </div>
+
+      <div className="flex gap-3 pt-2">
+        <button
+          type="submit"
+          disabled={isSaving}
+          className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+        >
+          {isSaving ? 'Saving…' : 'Save & Continue'}
+        </button>
+        {onSkip && (
+          <button
+            type="button"
+            onClick={() => void onSkip()}
+            disabled={isSkipping}
+            className="rounded-lg border px-4 py-2.5 text-sm font-medium disabled:opacity-50"
+          >
+            {isSkipping ? 'Skipping…' : 'Skip'}
+          </button>
+        )}
       </div>
     </form>
   )

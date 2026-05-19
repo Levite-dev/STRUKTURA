@@ -20,9 +20,7 @@ export function buildProfileInput(
           city: stringOrNull(address.city),
           province: stringOrNull(address.province),
           address: stringOrNull(address.address),
-          preferredCategories: stringArray(
-            prefs.interested_product_categories,
-          ),
+          preferredCategories: stringArray(prefs.interested_product_categories),
           interestedServices: stringArray(prefs.interested_services),
           preferredLocation: stringOrNull(prefs.preferred_location),
         },
@@ -65,9 +63,7 @@ export function buildProfileInput(
           firstProduct: stringOrNull(product.first_product),
           inventoryStock: numberOrNull(inventory.inventory_stock),
           verificationDocuments: objectAt(data, 'document_upload'),
-          businessRegNo: stringOrNull(
-            business.business_registration_number,
-          ),
+          businessRegNo: stringOrNull(business.business_registration_number),
           taxId: stringOrNull(business.tax_identification_number),
         },
       };
@@ -97,9 +93,7 @@ export function buildProfileInput(
           // Job seeker documents are intentionally optional. Agencies can choose
           // whether to hire based on the profile and portfolio first.
           verificationDocuments: objectAt(data, 'document_upload'),
-          availabilityStatus: stringOrNull(
-            availability.availability_status,
-          ),
+          availabilityStatus: stringOrNull(availability.availability_status),
           availableFrom: parseDate(prefs.available_start_date),
         },
       };

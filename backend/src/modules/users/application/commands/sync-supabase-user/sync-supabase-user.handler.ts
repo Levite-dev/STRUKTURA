@@ -38,7 +38,9 @@ export class SyncSupabaseUserHandler implements ICommandHandler<
     const user = await this.users.create({
       supabaseAuthId: command.supabaseAuthId,
       email: command.email,
-      fullName: command.fullName,
+      firstName: command.firstName,
+      lastName: command.lastName,
+      phone: command.phone,
       emailVerifiedAt: command.emailVerifiedAt,
     });
 
