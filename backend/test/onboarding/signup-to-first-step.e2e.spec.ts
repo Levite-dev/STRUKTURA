@@ -60,7 +60,9 @@ describe('Signup to first step (integration)', () => {
         flowId: flow!.id,
         status: 'NOT_STARTED',
         completionPercentage: 0,
-        currentStepId: [...flow!.steps].sort((a, b) => a.stepOrder - b.stepOrder)[0]?.id ?? null,
+        currentStepId:
+          [...flow!.steps].sort((a, b) => a.stepOrder - b.stepOrder)[0]?.id ??
+          null,
       },
     });
     progressId = progress.id;
@@ -97,14 +99,20 @@ describe('Signup to first step (integration)', () => {
       data: { status: 'COMPLETED', completedAt: new Date() },
     });
 
-    const completed = allSteps.filter((s) =>
-      s.stepId === firstStep.stepId ? 'COMPLETED' : s.status,
-    ).filter((s) => s.status === 'COMPLETED' || s.status === 'SKIPPED').length + 1;
+    const completed =
+      allSteps
+        .filter((s) => (s.stepId === firstStep.stepId ? 'COMPLETED' : s.status))
+        .filter((s) => s.status === 'COMPLETED' || s.status === 'SKIPPED')
+        .length + 1;
     const pct = Math.round((completed / allSteps.length) * 100);
 
     await prisma.userOnboardingProgress.update({
       where: { id: progressId },
-      data: { completionPercentage: pct, status: 'IN_PROGRESS', lastActivityAt: new Date() },
+      data: {
+        completionPercentage: pct,
+        status: 'IN_PROGRESS',
+        lastActivityAt: new Date(),
+      },
     });
 
     const progress = await prisma.userOnboardingProgress.findUnique({

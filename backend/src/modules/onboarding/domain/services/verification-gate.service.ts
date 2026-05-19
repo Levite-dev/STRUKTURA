@@ -24,7 +24,11 @@ export class VerificationGateService {
   async assertCanPerform(userId: string, action: GatedAction): Promise<void> {
     const required = REQUIRED_DOCS[action];
     const approved = await this.prisma.document.findMany({
-      where: { ownerUserId: userId, type: { in: required }, status: 'APPROVED' },
+      where: {
+        ownerUserId: userId,
+        type: { in: required },
+        status: 'APPROVED',
+      },
       select: { type: true },
     });
     const approvedTypes = new Set(approved.map((d) => d.type));

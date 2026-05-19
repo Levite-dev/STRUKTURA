@@ -60,6 +60,8 @@ export class UsersController {
     @CurrentUser() user: AuthenticatedUser,
     @Body() body: SetPrimaryRoleRequestDto,
   ): Promise<void> {
-    await this.commandBus.execute(new SetPrimaryRoleCommand(user.id, body.role));
+    await this.commandBus.execute(
+      new SetPrimaryRoleCommand(user.id, body.role),
+    );
   }
 }

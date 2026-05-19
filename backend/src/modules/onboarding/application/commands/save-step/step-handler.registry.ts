@@ -1,7 +1,12 @@
 import { Injectable } from '@nestjs/common';
 
 export interface StepHandler {
-  handle(userId: string, progressId: string, stepId: string, data: unknown): Promise<void>;
+  handle(
+    userId: string,
+    progressId: string,
+    stepId: string,
+    data: unknown,
+  ): Promise<void>;
 }
 
 @Injectable()

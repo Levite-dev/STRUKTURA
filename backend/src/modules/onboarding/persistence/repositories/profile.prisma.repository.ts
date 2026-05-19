@@ -59,9 +59,7 @@ export class ProfilePrismaRepository implements ProfileRepository {
             expertiseTags: input.data.expertiseTags ?? [],
             location: input.data.location ?? null,
             portfolioFiles: jsonOrNull(input.data.portfolioFiles),
-            verificationDocuments: jsonOrNull(
-              input.data.verificationDocuments,
-            ),
+            verificationDocuments: jsonOrNull(input.data.verificationDocuments),
           },
           update: {
             businessName: input.data.businessName ?? null,
@@ -74,9 +72,7 @@ export class ProfilePrismaRepository implements ProfileRepository {
             expertiseTags: input.data.expertiseTags ?? [],
             location: input.data.location ?? null,
             portfolioFiles: jsonOrNull(input.data.portfolioFiles),
-            verificationDocuments: jsonOrNull(
-              input.data.verificationDocuments,
-            ),
+            verificationDocuments: jsonOrNull(input.data.verificationDocuments),
           },
         });
         return;
@@ -92,9 +88,7 @@ export class ProfilePrismaRepository implements ProfileRepository {
             productCategory: input.data.productCategory ?? null,
             firstProduct: input.data.firstProduct ?? null,
             inventoryStock: input.data.inventoryStock ?? null,
-            verificationDocuments: jsonOrNull(
-              input.data.verificationDocuments,
-            ),
+            verificationDocuments: jsonOrNull(input.data.verificationDocuments),
             businessRegNo: input.data.businessRegNo ?? null,
             taxId: input.data.taxId ?? null,
             payoutBankName: input.data.payoutBankName ?? null,
@@ -108,9 +102,7 @@ export class ProfilePrismaRepository implements ProfileRepository {
             productCategory: input.data.productCategory ?? null,
             firstProduct: input.data.firstProduct ?? null,
             inventoryStock: input.data.inventoryStock ?? null,
-            verificationDocuments: jsonOrNull(
-              input.data.verificationDocuments,
-            ),
+            verificationDocuments: jsonOrNull(input.data.verificationDocuments),
             businessRegNo: input.data.businessRegNo ?? null,
             taxId: input.data.taxId ?? null,
             payoutBankName: input.data.payoutBankName ?? null,
@@ -134,9 +126,7 @@ export class ProfilePrismaRepository implements ProfileRepository {
             yearsExperience: input.data.yearsExperience,
             preferredLocations: input.data.preferredLocations ?? [],
             portfolioFiles: jsonOrNull(input.data.portfolioFiles),
-            verificationDocuments: jsonOrNull(
-              input.data.verificationDocuments,
-            ),
+            verificationDocuments: jsonOrNull(input.data.verificationDocuments),
             availabilityStatus: input.data.availabilityStatus ?? null,
             availableFrom: input.data.availableFrom ?? null,
             resumeUrl: input.data.resumeUrl ?? null,
@@ -151,9 +141,7 @@ export class ProfilePrismaRepository implements ProfileRepository {
             yearsExperience: input.data.yearsExperience,
             preferredLocations: input.data.preferredLocations ?? [],
             portfolioFiles: jsonOrNull(input.data.portfolioFiles),
-            verificationDocuments: jsonOrNull(
-              input.data.verificationDocuments,
-            ),
+            verificationDocuments: jsonOrNull(input.data.verificationDocuments),
             availabilityStatus: input.data.availabilityStatus ?? null,
             availableFrom: input.data.availableFrom ?? null,
             resumeUrl: input.data.resumeUrl ?? null,
@@ -166,5 +154,5 @@ export class ProfilePrismaRepository implements ProfileRepository {
 
 function jsonOrNull(value: unknown): Prisma.InputJsonValue | undefined {
   if (value === undefined || value === null) return undefined;
-  return value as Prisma.InputJsonValue;
+  return value;
 }

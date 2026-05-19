@@ -73,7 +73,9 @@ describe('Multi-role onboarding (integration)', () => {
 
     await seedOnboarding(userId, 'CLIENT');
 
-    const rows = await prisma.userOnboardingProgress.findMany({ where: { userId } });
+    const rows = await prisma.userOnboardingProgress.findMany({
+      where: { userId },
+    });
     expect(rows).toHaveLength(1);
   });
 
@@ -91,7 +93,9 @@ describe('Multi-role onboarding (integration)', () => {
 
     await seedOnboarding(userId, 'CONTRACTOR');
 
-    const rows = await prisma.userOnboardingProgress.findMany({ where: { userId } });
+    const rows = await prisma.userOnboardingProgress.findMany({
+      where: { userId },
+    });
     expect(rows).toHaveLength(2);
 
     const user = await prisma.user.findUnique({ where: { id: userId } });
@@ -116,7 +120,10 @@ describe('Multi-role onboarding (integration)', () => {
     // Mark first CLIENT step completed
     const firstClientStep = clientProgress!.stepProgress[0];
     await prisma.userOnboardingStepProgress.updateMany({
-      where: { userOnboardingProgressId: clientProgress!.id, stepId: firstClientStep.stepId },
+      where: {
+        userOnboardingProgressId: clientProgress!.id,
+        stepId: firstClientStep.stepId,
+      },
       data: { status: 'COMPLETED' },
     });
 

@@ -1,4 +1,7 @@
-import { StepHandlerRegistry, StepHandler } from '../../src/modules/onboarding/application/commands/save-step/step-handler.registry';
+import {
+  StepHandlerRegistry,
+  StepHandler,
+} from '../../src/modules/onboarding/application/commands/save-step/step-handler.registry';
 
 describe('StepHandlerRegistry', () => {
   let registry: StepHandlerRegistry;
